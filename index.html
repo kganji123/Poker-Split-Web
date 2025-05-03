@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poker Split - Start Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Poker Split</h1>
+    <p class="tagline">Track. Rebuy. Split. Settle Instantly.</p>
+  </header>
+
+  <div class="game-bar" id="gameBar" style="display: none;"></div>
+
+  <main class="app-container">
+    <h2>🎮 Start a New Game</h2>
+    <label>Group Name <input type="text" id="groupName" placeholder="e.g., Friday Night Poker" /></label>
+    <label>Number of Players <input type="number" id="playerCount" min="2" value="4" /></label>
+    <label>Initial Chips Per Player <input type="number" id="initialChips" value="2000" /></label>
+    <label>Chip Value in Cash <input type="number" step="0.01" id="chipValue" value="5" /></label>
+    <button onclick="saveGameConfig()" class="btn primary">Continue ➡️</button>
+  </main>
+
+  <script>
+    function saveGameConfig() {
+      const groupName = document.getElementById("groupName").value.trim();
+      const playerCount = parseInt(document.getElementById("playerCount").value);
+      const initialChips = parseInt(document.getElementById("initialChips").value);
+      const chipValue = parseFloat(document.getElementById("chipValue").value);
+
+      if (!groupName || playerCount < 2 || isNaN(initialChips) || isNaN(chipValue)) {
+        alert("Please fill in all fields correctly.");
+        return;
+      }
+
+      const gameData = {
+        groupName,
+        playerCount,
+        initialChips,
+        chipValue
+      };
+
+      localStorage.setItem("gameData", JSON.stringify(gameData));
+      window.location.href = "players.html";
+    }
+  </script>
+</body>
+</html>
