@@ -18,17 +18,13 @@
     <h2>♻️ Rebuys</h2>
     <div id="rebuyContainer"></div>
 
-    <section class="summary-section">
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;"><section class="summary-section" style="flex:1;">
       <h3>💼 Table Summary</h3>
       <table id="tableSummary"></table>
-    </section>
-
-    <section class="leaderboard-section">
+    </section><section class="leaderboard-section" style="flex:1;">
       <h3>🏅 Leaderboard</h3>
       <table id="leaderboardTable"></table>
-    </section>
-
-    <button onclick="goToResults()" class="btn">➡️ Enter Final Chips</button>
+    </section></div><button onclick="goToResults()" class="btn">➡️ Enter Final Chips</button>
     <button id="backButton" class="btn">⬅ Back</button>
     <a href="poker-hands.html" class="icon-link">🂡 Poker Hands</a>
   </main>
@@ -40,13 +36,13 @@
     const tableSummary = document.getElementById("tableSummary");
     const leaderboardTable = document.getElementById("leaderboardTable");
 
-    players.forEach((player, i) => {
+    players.forEach((player, i) => { if (i % 4 === 0) container.appendChild(document.createElement("br"));
       const div = document.createElement("div");
       div.className = "player-entry";
       div.innerHTML = `
         <strong>${player.nickname}</strong><br>
         Rebuys: <input type="number" min="0" value="${player.rebuys}" onchange="updateRebuy(${i}, this.value)">
-        <p id="owed_${i}">Owes: $${(player.rebuys * gameData.chipValue).toFixed(2)}</p>
+        <p id="owed_${i}">Owes: $${((1 + player.rebuys) * gameData.chipValue).toFixed(2)}</p>
       `;
       container.appendChild(div);
     });

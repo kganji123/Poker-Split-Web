@@ -5,7 +5,7 @@
 <body>
 <header class="app-header"><h1>Poker Split</h1><p class="tagline">Track. Rebuy. Split. Settle Instantly.</p>
 <div id="gameBar" class="game-bar"></div><div id="gameTimer" class="game-bar" style="text-align: right;"></div></header>
-<main class="app-container"><h2>🎯 Final Chips</h2><form id="finalForm"></form>
+<main class="app-container"><h2>🎯 Final Chips</h2><div id="finalForm" style="display: flex; flex-wrap: wrap; gap: 20px;"></div><div id="totalMoneyOnBoard" style="text-align:right; margin-top: 10px;"></div>
 <h2>📊 Game Results</h2><table id="resultsTable"></table>
 <h2>🔁 Settlements</h2><div id="settlementList"></div>
 <button id="backButton" class="btn">⬅ Back</button><a href="poker-hands.html" class="icon-link">🂡 Poker Hands</a>
@@ -23,12 +23,12 @@ players.forEach((player, index) => {
       <input type="number" value="${player.finalChips}" onchange="updateChips(${index}, this.value)">
     </label>
   `;
-  form.appendChild(div);
+  document.getElementById("finalForm").appendChild(div);
 });
 
 function updateChips(index, value) {
   players[index].finalChips = parseInt(value || 0);
-  localStorage.setItem("players", JSON.stringify(players));
+  localStorage.setItem("players", JSON.stringify(players)); localStorage.setItem("timerActive", "false");
   renderResults();
 }
 
