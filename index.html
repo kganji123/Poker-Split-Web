@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,18 +12,16 @@
     <h1>Poker Split</h1>
     <p class="tagline">Track. Rebuy. Split. Settle Instantly.</p>
   </header>
-
-  <div class="game-bar" id="gameBar" style="display: none;"></div>
-
+  <div class="game-bar" id="gameBar"></div>
   <main class="app-container">
-    <h2>🎮 Let's Go & Start a New Game</h2>
+    <h2>🎮 Start a New Game</h2>
     <label>Group Name <input type="text" id="groupName" placeholder="e.g., Friday Night Poker" /></label>
     <label>Number of Players <input type="number" id="playerCount" min="2" value="4" /></label>
     <label>Initial Chips Per Player <input type="number" id="initialChips" value="2000" /></label>
     <label>Chip Value in Cash <input type="number" step="0.01" id="chipValue" value="5" /></label>
     <button onclick="saveGameConfig()" class="btn primary">Continue ➡️</button>
+    <a href="poker-hands.html" class="icon-link">🂡 Poker Hands</a>
   </main>
-
   <script>
     function saveGameConfig() {
       const groupName = document.getElementById("groupName").value.trim();
@@ -46,5 +45,6 @@
       window.location.href = "players.html";
     }
   </script>
+  <script src="script.js"></script>
 </body>
 </html>
