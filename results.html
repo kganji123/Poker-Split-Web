@@ -8,7 +8,7 @@
 <main class="app-container"><h2>🎯 Final Chips</h2><div id="finalForm" style="display: flex; flex-wrap: wrap; gap: 20px;"></div><div id="totalMoneyOnBoard" style="text-align:right; margin-top: 10px;"></div>
 <h2>📊 Game Results</h2><table id="resultsTable"></table>
 <h2>🔁 Settlements</h2><div id="settlementList"></div>
-<button id="backButton" class="btn">⬅ Back</button><a href="poker-hands.html" class="icon-link">🂡 Poker Hands</a>
+<button class="btn" onclick="endGame()">🔁 End Game & Return Home</button><button id="backButton" class="btn">⬅ Back</button><a href="poker-hands.html" class="icon-link">🂡 Poker Hands</a>
 </main>
 <script>
 const gameData = JSON.parse(localStorage.getItem("gameData"));
@@ -73,7 +73,9 @@ function renderResults() {
 }
 
 renderResults();
+function endGame() { localStorage.clear(); window.location.href = "index.html"; }
 </script>
-<script src="script.js"></script>
+<script src="script.js">function endGame() { localStorage.clear(); window.location.href = "index.html"; }
+</script>
 </body>
 </html>

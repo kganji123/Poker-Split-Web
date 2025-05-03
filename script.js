@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="display: flex; gap: 15px; align-items: center;">
           <span id="totalPot">💰 Total Pot: $${totalPot}</span>
           <span id="gameTimer">⏱️ 0m 0s</span>
-          <a href="poker-hands.html" title="Poker Hands">🂡</a>
+          <a href="poker-hands.html" title="Poker Hands" style="font-size: 20px;">🂡</a>
         </div>
       </div>
     `;

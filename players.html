@@ -33,7 +33,7 @@ document.getElementById("playerForm").addEventListener("submit", function (e) {
     const nickname = this[`nickname_${i}`].value.trim() || name;
     players.push({ name, nickname, rebuys: 0, finalChips: 0 });
   }
-  localStorage.setItem("players", JSON.stringify(players));
+  localStorage.setItem("players", JSON.stringify(players)); localStorage.setItem("gameStartTime", new Date().toISOString()); localStorage.setItem("timerActive", "true");
   localStorage.setItem("gameStartTime", new Date().toISOString());
   window.location.href = "rebuys.html";
 });
