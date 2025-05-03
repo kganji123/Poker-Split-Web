@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (gameData && gameBar) {
     const players = JSON.parse(localStorage.getItem("players") || "[]");
-    const rebuyTotal = players.length > 0 ? players.reduce((acc, p) => acc + (1 + (p.rebuys || 0)), 0) : gameData.playerCount;
+    const rebuyTotal = players.reduce((acc, p) => acc + (1 + (p.rebuys || 0)), 0);
     const totalPot = (rebuyTotal * gameData.chipValue).toFixed(2);
 
     gameBar.innerHTML = `
