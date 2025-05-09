@@ -1,81 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Results</title><link rel="stylesheet" href="style.css" /></head>
-<body>
-<header class="app-header"><h1>Poker Split</h1><p class="tagline">Track. Rebuy. Split. Settle Instantly.</p>
-<div id="gameBar" class="game-bar"></div><div id="gameTimer" class="game-bar" style="text-align: right;"></div></header>
-<main class="app-container"><h2>🎯 Final Chips</h2><div id="finalForm" style="display: flex; flex-wrap: wrap; gap: 20px;"></div><div id="totalMoneyOnBoard" style="text-align:right; margin-top: 10px;"></div>
-<h2>📊 Game Results</h2><table id="resultsTable"></table>
-<h2>🔁 Settlements</h2><div id="settlementList"></div>
-<button class="btn" onclick="endGame()">🔁 End Game & Return Home</button><button id="backButton" class="btn">⬅ Back</button><a href="poker-hands.html" class="icon-link">🂡 Poker Hands</a>
-</main>
-<script>
-const gameData = JSON.parse(localStorage.getItem("gameData"));
-const players = JSON.parse(localStorage.getItem("players"));
-const form = document.getElementById("finalForm");
-
-players.forEach((player, index) => {
-  const div = document.createElement("div");
-  div.className = "player-entry";
-  div.innerHTML = `
-    <label>${player.nickname} Final Chips
-      <input type="number" value="${player.finalChips}" onchange="updateChips(${index}, this.value)">
-    </label>
-  `;
-  document.getElementById("finalForm").appendChild(div);
-});
-
-function updateChips(index, value) {
-  players[index].finalChips = parseInt(value || 0);
-  localStorage.setItem("players", JSON.stringify(players)); localStorage.setItem("timerActive", "false");
-  renderResults();
-}
-
-function renderResults() {
-  const resultsTable = document.getElementById("resultsTable");
-  resultsTable.innerHTML = "<tr><th>Player</th><th>Net $</th></tr>";
-
-  const buyIn = gameData.initialChips;
-  const value = gameData.chipValue;
-  const totalChips = players.reduce((sum, p) => sum + p.finalChips, 0);
-  const totalCash = (players.length + players.reduce((sum, p) => sum + p.rebuys, 0)) * value;
-
-  const chipValuePerUnit = totalCash / totalChips;
-
-  players.forEach(player => {
-    const spent = (1 + player.rebuys) * value;
-    const earned = player.finalChips * chipValuePerUnit;
-    player.net = earned - spent;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${player.nickname}</td><td>$${player.net.toFixed(2)}</td>`;
-    resultsTable.appendChild(tr);
-  });
-
-  const settlementDiv = document.getElementById("settlementList");
-  settlementDiv.innerHTML = "";
-  const creditors = players.filter(p => p.net > 0).sort((a, b) => b.net - a.net);
-  const debtors = players.filter(p => p.net < 0).sort((a, b) => a.net - b.net);
-
-  while (creditors.length && debtors.length) {
-    const payer = debtors[0];
-    const receiver = creditors[0];
-    const amount = Math.min(-payer.net, receiver.net);
-
-    settlementDiv.innerHTML += `<p>${payer.nickname} pays $${amount.toFixed(2)} to ${receiver.nickname}</p>`;
-
-    payer.net += amount;
-    receiver.net -= amount;
-
-    if (Math.abs(payer.net) < 0.01) debtors.shift();
-    if (Math.abs(receiver.net) < 0.01) creditors.shift();
-  }
-}
-
-renderResults();
-function endGame() { localStorage.clear(); window.location.href = "index.html"; }
-</script>
-<script src="script.js">function endGame() { localStorage.clear(); window.location.href = "index.html"; }
-</script>
-</body>
-</html>
+<html><head><link rel="stylesheet" href="style.css"><title>Results</title></head>
+<body><div class="game-bar" id="gameBar"></div><main class="app-container">
+<h2>Game Results</h2><div class="card"><table id="resultTable"></table></div>
+<h3>Settlement Summary</h3><div class="card"><table id="settlementTable"></table></div>
+<p id="reconMessage"></p>
+<button onclick="resetGame()">End Game & Return Home</button>
+</main><script src="script.js"></script></body></html>
