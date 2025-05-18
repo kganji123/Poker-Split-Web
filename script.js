@@ -1,1 +1,1 @@
-function goToPlayerDetails(){window.location.href='players.html'}function savePlayerDetails(){localStorage.setItem('players',JSON.stringify([{nickname:'Player 1'},{nickname:'Player 2'}]));window.location.href='rebuys.html'}function goToResults(){window.location.href='results.html'}function resetGame(){localStorage.clear();window.location.href='index.html'}
+console.log('Poker Split app loaded');
