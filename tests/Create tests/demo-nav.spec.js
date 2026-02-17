@@ -1,5 +1,5 @@
 const { test, expect } = require("@playwright/test");
-const { resetStorage } = require("./_helpers");
+const { resetStorage } = require("../_helpers");
 
 test("Demo data loads + navigation works across pages", async ({ page }) => {
   await resetStorage(page);
