@@ -1,4 +1,4 @@
-name: E2E Tests (Playwright)
+name: E2E Tests
 
 on:
   push:
@@ -7,37 +7,26 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
-      - name: Install deps
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      # Serve your static site (no framework) on a local HTTP server
-      - name: Start static server
-        run: |
-          npx http-server . -p 4173 &
-          echo "Server started"
-
       - name: Run E2E tests
         run: npm run test:e2e
 
-      - name: Upload Playwright report artifacts
+      - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
-          path: |
-            playwright-report
-            test-results
+          name: playwright-report
+          path: playwright-report
