@@ -1,0 +1,72 @@
+POKERSPLIT - FILE LIST
+======================
+
+📦 ALL FILES INCLUDED (7 total)
+================================
+
+Production Website Files:
+─────────────────────────
+1. index.html (107 KB)
+   Main application with game setup, live sessions, settlements, dashboard
+
+2. hand-history.html (70 KB)
+   Hand tracking, statistics, player rankings
+
+3. poker-hands.html (18 KB)
+   Visual poker hand rankings reference guide
+
+4. leaderboard.html (30 KB)
+   Family standings, player rankings, rivalries, records
+
+5. settlement.html (8 KB)
+   Balance tracking, payment management
+
+Documentation:
+──────────────
+6. README.md (6 KB)
+   Full documentation and feature list
+
+7. DEPLOYMENT-GUIDE.txt (This file)
+   Step-by-step deployment instructions
+
+
+✅ WHAT TO DEPLOY
+=================
+
+Upload ALL 7 files to your web host.
+
+Minimum required: Files 1-5 (the 5 HTML files)
+Recommended: All 7 files (includes documentation)
+
+
+🚀 QUICK START
+==============
+
+GitHub Pages (Easiest):
+  1. Upload all files to your repo
+  2. Enable GitHub Pages (Settings → Pages)
+  3. Done!
+
+Git Command Line:
+  git add .
+  git commit -m "Deploy PokerSplit"
+  git push
+
+Other Hosts:
+  Just upload all files - no setup needed!
+
+
+📊 TOTAL SIZE
+=============
+
+237 KB total
+Zero dependencies
+Pure HTML/CSS/JavaScript
+No build process required
+
+
+✅ READY TO DEPLOY!
+===================
+
+All files are clean, token-free, and ready to go live.
+See DEPLOYMENT-GUIDE.txt for detailed instructions.

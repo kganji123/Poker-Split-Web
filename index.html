@@ -1,1 +1,1927 @@
-<!DOCTYPE html><html><head><title>Start Game</title></head><body><h1>Start Game</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f4b300">
+<meta name="description" content="PokerSplit — Track. Rebuy. Split. Settle Instantly. Private family poker leagues made simple.">
+<title>PokerSplit — Track. Rebuy. Split. Settle Instantly.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS — Golden Yellow + Cream
+══════════════════════════════════════════ */
+:root {
+  /* Golden #f4b300 spectrum */
+  --fly-deep:   #b38200;
+  --fly:        #f4b300;
+  --fly-mid:    #f9c52e;
+  --fly-light:  #fdd96a;
+  --fly-pale:   #feeab0;
+  --fly-glow:   rgba(244,179,0,0.18);
+
+  /* Cream / surface spectrum */
+  --cream-bg:     #FDF6EC;
+  --cream:        #FAF0DC;
+  --cream-2:      #F5E8C8;
+  --cream-card:   #FFFDF8;
+  --cream-border: rgba(200,145,0,0.15);
+  --cream-border2:rgba(200,145,0,0.25);
+
+  /* Brown text spectrum */
+  --brown-deep:   #1E0E04;
+  --brown:        #2C1810;
+  --brown-mid:    #5C3420;
+  --brown-muted:  #8B6040;
+  --brown-faint:  #BFA080;
+
+  /* Semantic */
+  --win:          #2E7D32;
+  --win-bg:       rgba(46,125,50,0.10);
+  --loss:         #C62828;
+  --loss-bg:      rgba(198,40,40,0.10);
+  --pending:      #E65100;
+  --settled:      #1B5E20;
+
+  /* Radii */
+  --r-sm:  8px;
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+  --r-2xl: 36px;
+
+  /* Safe areas */
+  --safe-top:    env(safe-area-inset-top, 44px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--fly);
+  color: var(--brown);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Golden textured background */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 5%,  rgba(244,179,0,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 60% at 90% 95%,  rgba(210,145,0,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 50% 50%,  rgba(244,179,0,0.10) 0%, transparent 80%);
+  pointer-events: none; z-index: 0;
+}
+
+#app {
+  position: relative; z-index: 1;
+  max-width: 440px; margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* ── TYPOGRAPHY ── */
+.display { font-family: 'Fraunces', serif; }
+.mono    { font-family: 'DM Mono', monospace; }
+
+/* ══════════════════════════════════════════
+   HEADER / NAV
+══════════════════════════════════════════ */
+.site-header {
+  padding: calc(var(--safe-top) + 12px) 20px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 80;
+  background: rgba(244,179,0,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(200,145,0,0.18);
+}
+
+.logo {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; font-weight: 900;
+  color: var(--brown); letter-spacing: -0.5px;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-badge {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--brown); color: var(--fly-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.logo span { color: var(--fly-deep); }
+
+.header-nav { display: flex; gap: 4px; }
+.nav-link {
+  font-size: 12px; font-weight: 700; color: var(--brown-mid);
+  text-decoration: none; padding: 7px 12px; border-radius: var(--r-sm);
+  transition: all 0.2s; letter-spacing: 0.2px;
+  border: 1px solid transparent;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(44,24,16,0.10);
+  border-color: rgba(44,24,16,0.12);
+  color: var(--brown);
+}
+
+/* ══════════════════════════════════════════
+   HERO SECTION
+══════════════════════════════════════════ */
+.hero {
+  padding: 40px 20px 32px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-suit {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 260px; opacity: 0.04; pointer-events: none;
+  color: var(--brown); user-select: none; line-height: 1;
+  animation: suitDrift 10s ease-in-out infinite;
+}
+@keyframes suitDrift {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-14px) rotate(3deg); }
+}
+
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(44,24,16,0.10); color: var(--brown-mid);
+  padding: 6px 14px; border-radius: 20px; font-size: 11px;
+  font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  border: 1px solid rgba(44,24,16,0.12); margin-bottom: 16px;
+}
+
+.hero-title {
+  font-family: 'Fraunces', serif;
+  font-size: 52px; font-weight: 900; line-height: 0.95;
+  color: var(--brown); letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+.hero-title em { color: var(--fly-deep); font-style: italic; }
+
+.hero-sub {
+  font-size: 15px; color: var(--brown-mid); line-height: 1.7;
+  max-width: 320px; margin: 0 auto 32px; font-weight: 500;
+}
+
+/* Feature pills row */
+.feature-pills {
+  display: flex; gap: 8px; justify-content: center;
+  flex-wrap: wrap; margin-bottom: 32px;
+}
+.feature-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 20px;
+  background: var(--cream-card); color: var(--brown-mid);
+  font-size: 13px; font-weight: 600;
+  border: 1px solid var(--cream-border2);
+  box-shadow: 0 2px 8px rgba(140,80,20,0.12);
+}
+
+/* ══════════════════════════════════════════
+   MAIN CARD
+══════════════════════════════════════════ */
+.main-card {
+  background: var(--cream-card);
+  border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  border: 1px solid var(--cream-border2);
+  border-bottom: none;
+  padding: 28px 20px;
+  box-shadow: 0 -8px 32px rgba(140,80,20,0.12);
+  min-height: calc(100vh - 320px);
+}
+
+/* ══════════════════════════════════════════
+   SECTION TITLES
+══════════════════════════════════════════ */
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; font-weight: 700; color: var(--brown);
+  margin-bottom: 4px;
+}
+.section-sub { font-size: 13px; color: var(--brown-muted); margin-bottom: 16px; }
+
+/* ══════════════════════════════════════════
+   SCREENS
+══════════════════════════════════════════ */
+.screen { display: none; }
+.screen.active { display: block; animation: screenIn 0.3s ease; }
+@keyframes screenIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ══════════════════════════════════════════
+   FORM ELEMENTS
+══════════════════════════════════════════ */
+.field-group { margin-bottom: 16px; }
+.field-label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--brown-muted); margin-bottom: 8px;
+}
+.field-input {
+  width: 100%; background: var(--cream);
+  border: 1.5px solid var(--cream-border2);
+  border-radius: var(--r-md); padding: 14px 16px;
+  color: var(--brown); font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; font-weight: 500; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.field-input:focus {
+  border-color: var(--fly);
+  box-shadow: 0 0 0 3px rgba(244,179,0,0.15);
+}
+.field-input::placeholder { color: var(--brown-faint); }
+select.field-input { cursor: pointer; }
+
+.amount-wrap { position: relative; }
+.amount-prefix {
+  position: absolute; left: 16px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--brown-muted); font-size: 18px;
+  font-family: 'DM Mono', monospace; font-weight: 500;
+  pointer-events: none;
+}
+.amount-input { padding-left: 34px !important; font-family: 'DM Mono', monospace !important; font-size: 20px !important; }
+
+/* ══════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════ */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; transition: all 0.18s; user-select: none;
+  -webkit-user-select: none; text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--brown);
+  color: var(--fly-light); border-radius: var(--r-lg);
+  padding: 16px 24px; font-size: 16px; width: 100%;
+  box-shadow: 0 4px 16px rgba(44,24,16,0.25);
+  letter-spacing: 0.2px;
+}
+.btn-primary:hover { background: var(--brown-mid); }
+
+.btn-firefly {
+  background: var(--fly);
+  color: var(--brown); border-radius: var(--r-lg);
+  padding: 16px 24px; font-size: 16px; width: 100%;
+  box-shadow: 0 4px 16px rgba(244,179,0,0.30);
+}
+.btn-firefly:hover { background: var(--fly); }
+
+.btn-outline {
+  background: transparent; color: var(--brown-mid);
+  border: 1.5px solid var(--cream-border2); border-radius: var(--r-lg);
+  padding: 14px 24px; font-size: 15px; width: 100%;
+}
+.btn-outline:hover { background: var(--cream-2); }
+
+.btn-sm { padding: 10px 16px; font-size: 13px; border-radius: var(--r-sm); width: auto; }
+.btn-danger {
+  background: var(--loss-bg); color: var(--loss);
+  border: 1.5px solid rgba(198,40,40,0.20); border-radius: var(--r-lg);
+  padding: 14px 24px; font-size: 15px; width: 100%;
+}
+
+/* ══════════════════════════════════════════
+   PLAYER ROW CARDS
+══════════════════════════════════════════ */
+.player-card {
+  background: var(--cream); border: 1.5px solid var(--cream-border2);
+  border-radius: var(--r-lg); padding: 16px;
+  margin-bottom: 10px; position: relative;
+  transition: border-color 0.2s;
+}
+.player-card.eliminated { opacity: 0.5; }
+
+.player-row { display: flex; align-items: center; gap: 12px; }
+.avatar {
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; flex-shrink: 0; font-size: 14px;
+  background: var(--fly-pale); color: var(--brown);
+  border: 2px solid var(--fly-light);
+}
+.avatar-sm { width: 36px; height: 36px; font-size: 12px; }
+.avatar-md { width: 44px; height: 44px; }
+.avatar-lg { width: 56px; height: 56px; font-size: 20px; }
+
+.player-info { flex: 1; min-width: 0; }
+.player-name  { font-size: 15px; font-weight: 700; color: var(--brown); }
+.player-meta  { font-size: 12px; color: var(--brown-muted); margin-top: 2px; }
+
+/* ══════════════════════════════════════════
+   RESULT PILLS
+══════════════════════════════════════════ */
+.result-pill {
+  font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500;
+  padding: 5px 12px; border-radius: 20px; display: inline-block; white-space: nowrap;
+}
+.result-pill.win  { background: var(--win-bg);  color: var(--win); }
+.result-pill.loss { background: var(--loss-bg); color: var(--loss); }
+.result-pill.even { background: rgba(140,80,20,0.08); color: var(--brown-muted); }
+
+/* ══════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+}
+.badge-firefly   { background: rgba(244,179,0,0.15); color: var(--fly-deep); border: 1px solid rgba(244,179,0,0.3); }
+.badge-win     { background: var(--win-bg);  color: var(--win);  border: 1px solid rgba(46,125,50,0.2); }
+.badge-loss    { background: var(--loss-bg); color: var(--loss); border: 1px solid rgba(198,40,40,0.2); }
+.badge-pending { background: rgba(230,81,0,0.10); color: var(--pending); border: 1px solid rgba(230,81,0,0.2); }
+.badge-settled { background: rgba(27,94,32,0.10); color: var(--settled); border: 1px solid rgba(27,94,32,0.2); }
+
+/* ══════════════════════════════════════════
+   DIVIDER
+══════════════════════════════════════════ */
+.divider { height: 1px; background: var(--cream-border); margin: 16px 0; }
+
+/* ══════════════════════════════════════════
+   STAT TILES
+══════════════════════════════════════════ */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-tile {
+  background: var(--cream); border: 1.5px solid var(--cream-border2);
+  border-radius: var(--r-md); padding: 14px;
+}
+.stat-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--brown-muted); margin-bottom: 6px; }
+.stat-value { font-family: 'DM Mono', monospace; font-size: 22px; color: var(--brown); font-weight: 500; }
+.stat-value.firefly { color: var(--fly-deep); }
+.stat-value.win   { color: var(--win); }
+.stat-value.loss  { color: var(--loss); }
+
+/* ══════════════════════════════════════════
+   SECTION HEADER ROW
+══════════════════════════════════════════ */
+.sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 24px 0 12px;
+}
+.sec-action { font-size: 13px; color: var(--fly-deep); font-weight: 700; cursor: pointer; }
+
+/* ══════════════════════════════════════════
+   LEADERBOARD ROWS
+══════════════════════════════════════════ */
+.lb-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 0; border-bottom: 1px solid var(--cream-border);
+  cursor: pointer; transition: background 0.15s;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank {
+  font-family: 'Fraunces', serif; font-size: 22px;
+  color: var(--brown-faint); width: 32px; text-align: center; flex-shrink: 0;
+}
+.lb-rank.gold { color: var(--fly-deep); }
+.lb-rank.silver { color: #888; }
+.lb-rank.bronze { color: #A0522D; }
+.lb-info { flex: 1; }
+.lb-name { font-size: 15px; font-weight: 700; color: var(--brown); }
+.lb-sub  { font-size: 12px; color: var(--brown-muted); margin-top: 2px; }
+.lb-amount { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
+
+/* ══════════════════════════════════════════
+   SETTLEMENT ROW
+══════════════════════════════════════════ */
+.settle-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 0; border-bottom: 1px solid var(--cream-border);
+}
+.settle-row:last-child { border-bottom: none; }
+.settle-arrow { color: var(--fly-deep); font-size: 18px; flex-shrink: 0; animation: arrowPulse 2s infinite; }
+@keyframes arrowPulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+.settle-amount { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--fly-deep); white-space: nowrap; }
+.pay-btn {
+  padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+  background: rgba(244,179,0,0.12); color: var(--fly-deep);
+  border: 1.5px solid rgba(244,179,0,0.30); transition: all 0.2s;
+  white-space: nowrap;
+}
+.pay-btn:active { transform: scale(0.96); }
+.pay-btn.paid { background: var(--win-bg); color: var(--win); border-color: rgba(46,125,50,0.25); }
+
+/* ══════════════════════════════════════════
+   HAND RANK GRID (during live session)
+══════════════════════════════════════════ */
+.hand-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
+.hand-btn {
+  background: var(--cream); border: 1.5px solid var(--cream-border2);
+  border-radius: 10px; padding: 10px 4px; cursor: pointer;
+  transition: all 0.18s; text-align: center;
+}
+.hand-btn.selected, .hand-btn:active {
+  background: rgba(244,179,0,0.12); border-color: var(--fly);
+  transform: scale(0.96);
+}
+.hand-btn .h-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.hand-btn .h-name { font-size: 9px; font-weight: 700; color: var(--brown-muted); line-height: 1.2; }
+
+/* ══════════════════════════════════════════
+   PROGRESS BAR
+══════════════════════════════════════════ */
+.progress-track { height: 6px; background: var(--cream-2); border-radius: 3px; overflow: hidden; }
+.progress-fill  { height: 100%; background: linear-gradient(90deg, var(--fly-deep), var(--fly-light)); border-radius: 3px; transition: width 0.6s ease; }
+
+/* ══════════════════════════════════════════
+   TAB SWITCHER
+══════════════════════════════════════════ */
+.tab-row {
+  display: flex; background: var(--cream-2);
+  border: 1.5px solid var(--cream-border2); border-radius: var(--r-lg);
+  padding: 4px; margin-bottom: 20px;
+}
+.tab-btn {
+  flex: 1; padding: 10px; text-align: center;
+  font-size: 13px; font-weight: 700; color: var(--brown-muted);
+  border-radius: var(--r-md); cursor: pointer; transition: all 0.2s;
+  user-select: none;
+}
+.tab-btn.active {
+  background: var(--cream-card); color: var(--brown);
+  box-shadow: 0 2px 8px rgba(140,80,20,0.12);
+}
+
+/* ══════════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════════ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 440px;
+  background: rgba(250,240,220,0.96); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1.5px solid var(--cream-border2);
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 10px 4px calc(var(--safe-bottom) + 8px);
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px 12px; border-radius: var(--r-sm);
+  transition: all 0.2s; flex: 1; text-decoration: none;
+}
+.nav-icon  { font-size: 22px; }
+.nav-label { font-size: 10px; color: var(--brown-faint); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; transition: color 0.2s; }
+.nav-item.active .nav-label { color: var(--fly-deep); }
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(44,24,16,0.55);
+  backdrop-filter: blur(4px); z-index: 200;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--cream-card); border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  border: 1.5px solid var(--cream-border2); border-bottom: none;
+  padding: 24px 20px calc(var(--safe-bottom) + 24px);
+  width: 100%; max-width: 440px;
+  animation: modalUp 0.3s ease;
+  max-height: 92vh; overflow-y: auto;
+}
+@keyframes modalUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: var(--cream-2); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: var(--brown); margin-bottom: 20px; }
+
+/* ══════════════════════════════════════════
+   CHIP COUNTER MODAL
+══════════════════════════════════════════ */
+.chip-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-border); }
+.chip-row:last-child { border-bottom: none; }
+.chip-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.count-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.count-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--cream-2); border: 1.5px solid var(--cream-border2); color: var(--brown); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.count-btn:active { background: var(--fly); color: var(--brown); }
+.count-val { font-family: 'DM Mono', monospace; font-size: 18px; width: 40px; text-align: center; color: var(--brown); }
+
+/* ══════════════════════════════════════════
+   SUMMARY HERO
+══════════════════════════════════════════ */
+.summary-hero {
+  background: linear-gradient(135deg, var(--fly-light), var(--fly));
+  border-radius: var(--r-xl); padding: 28px; text-align: center;
+  margin-bottom: 20px; position: relative; overflow: hidden;
+}
+.summary-hero::before { 
+  content: '🏆'; position: absolute; font-size: 160px;
+  right: -20px; top: -20px; opacity: 0.08;
+  animation: trophyPulse 4s ease-in-out infinite;
+}
+@keyframes trophyPulse { 0%,100%{transform:scale(1) rotate(-5deg)} 50%{transform:scale(1.05) rotate(5deg)} }
+.summary-champ { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; color: var(--brown); margin-bottom: 4px; }
+.summary-amount { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--brown-deep); }
+.summary-meta { font-size: 13px; color: var(--brown-mid); margin-top: 6px; }
+
+/* ══════════════════════════════════════════
+   LIVE SESSION
+══════════════════════════════════════════ */
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #2E7D32; display: inline-block; margin-right: 5px; animation: liveBlink 1.4s infinite; }
+@keyframes liveBlink { 0%,100%{box-shadow:0 0 0 0 rgba(46,125,50,0.4)} 50%{box-shadow:0 0 0 5px rgba(46,125,50,0)} }
+
+.live-stats {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; margin-bottom: 16px;
+}
+.live-stat {
+  background: var(--cream); border: 1.5px solid var(--cream-border2);
+  border-radius: var(--r-md); padding: 10px; text-align: center;
+}
+.live-stat-val { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--brown); }
+.live-stat-val.firefly { color: var(--fly-deep); }
+.live-stat-label { font-size: 10px; color: var(--brown-muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 3px; }
+
+.action-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 440px;
+  background: rgba(250,240,220,0.97); backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1.5px solid var(--cream-border2);
+  padding: 12px 16px calc(var(--safe-bottom) + 12px);
+  z-index: 100;
+}
+.action-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.action-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; height: 58px; border-radius: var(--r-md);
+  background: var(--cream); border: 1.5px solid var(--cream-border2);
+  cursor: pointer; font-size: 11px; font-weight: 700; color: var(--brown-mid);
+  transition: all 0.18s;
+}
+.action-btn:active { background: var(--cream-2); transform: scale(0.96); }
+.action-btn.primary-action {
+  background: rgba(244,179,0,0.12); color: var(--fly-deep);
+  border-color: rgba(244,179,0,0.35);
+}
+.action-btn span:first-child { font-size: 20px; }
+
+/* ══════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════ */
+.empty-state { text-align: center; padding: 48px 20px; }
+.empty-icon  { font-size: 48px; margin-bottom: 14px; display: block; opacity: 0.45; }
+.empty-title { font-family: 'Fraunces', serif; font-size: 22px; color: var(--brown); margin-bottom: 8px; }
+.empty-sub   { font-size: 14px; color: var(--brown-muted); line-height: 1.6; }
+
+/* ══════════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════════ */
+.confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 500; }
+.cp { position: absolute; animation: cpFall linear forwards; }
+@keyframes cpFall {
+  from { opacity:1; transform:translateY(-10px) rotate(0deg); }
+  to   { opacity:0; transform:translateY(100vh) rotate(720deg); }
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: calc(var(--safe-bottom) + 90px); left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--brown); color: var(--fly-pale);
+  padding: 12px 20px; border-radius: var(--r-md);
+  font-size: 14px; font-weight: 600; z-index: 999;
+  opacity: 0; transition: all 0.28s; white-space: nowrap;
+  box-shadow: 0 8px 28px rgba(44,24,16,0.35); pointer-events: none;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* scroll area */
+.page-body { padding-bottom: calc(90px + var(--safe-bottom)); }
+
+/* ══════════════════════════════════════════
+   FAMILY COLOR CHIPS
+══════════════════════════════════════════ */
+.color-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 8px; }
+.color-swatch { height: 44px; border-radius: var(--r-sm); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+.color-swatch.selected { border-color: var(--brown); transform: scale(0.93); }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<!-- ══════════════════════ HEADER ══════════════════════ -->
+<header class="site-header">
+  <a href="/" class="logo">
+    <div class="logo-badge">🂡</div>
+    Poker<span>Split</span>
+  </a>
+  <nav class="header-nav">
+    <a href="/hand-history.html" class="nav-link">History</a>
+    <a href="/poker-hands.html"  class="nav-link">Hands</a>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: WELCOME
+══════════════════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-suit">♠</div>
+    <div class="hero-pill">🃏 Private Family Poker Leagues</div>
+    <h1 class="hero-title">Track.<br><em>Split.</em><br>Settle.</h1>
+    <p class="hero-sub">Run your private family poker nights with smart chip tracking, automatic settlements, and a full league history.</p>
+    <div class="feature-pills">
+      <div class="feature-pill">🏠 Family vs Family</div>
+      <div class="feature-pill">💰 Smart Settlements</div>
+      <div class="feature-pill">📊 Full History</div>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="main-card page-body">
+    <div class="section-title">Get Started</div>
+    <div class="section-sub">Create a league or load a demo to explore.</div>
+
+    <button class="btn btn-primary" onclick="goTo('screen-setup')" style="margin-bottom:12px;">
+      ♠ Create Your League →
+    </button>
+    <button class="btn btn-outline" onclick="loadDemo()">
+      View Demo League
+    </button>
+
+    <div class="divider" style="margin:28px 0 20px;"></div>
+
+    <!-- How it works -->
+    <div class="section-title" style="font-size:18px; margin-bottom:16px;">How it works</div>
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; gap:14px; align-items:flex-start;">
+        <div style="width:36px; height:36px; border-radius:50%; background:var(--fly); color:var(--brown); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; flex-shrink:0;">1</div>
+        <div>
+          <div style="font-size:15px; font-weight:700; color:var(--brown); margin-bottom:3px;">Create your league</div>
+          <div style="font-size:13px; color:var(--brown-muted); line-height:1.5;">Add families and players. Set your buy-in and chip structure.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:14px; align-items:flex-start;">
+        <div style="width:36px; height:36px; border-radius:50%; background:var(--fly); color:var(--brown); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; flex-shrink:0;">2</div>
+        <div>
+          <div style="font-size:15px; font-weight:700; color:var(--brown); margin-bottom:3px;">Start a session</div>
+          <div style="font-size:13px; color:var(--brown-muted); line-height:1.5;">Track rebuys, record winning hands, and manage chip counts in real time.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:14px; align-items:flex-start;">
+        <div style="width:36px; height:36px; border-radius:50%; background:var(--fly); color:var(--brown); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; flex-shrink:0;">3</div>
+        <div>
+          <div style="font-size:15px; font-weight:700; color:var(--brown); margin-bottom:3px;">Settle instantly</div>
+          <div style="font-size:13px; color:var(--brown-muted); line-height:1.5;">Our algorithm calculates the minimum transactions needed between families. One tap to pay.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: LEAGUE SETUP
+══════════════════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+  <div class="hero" style="padding-bottom:20px; text-align:left;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <button onclick="goTo('screen-welcome')" style="background:rgba(44,24,16,0.10); border:none; border-radius:50%; width:40px; height:40px; font-size:18px; cursor:pointer; color:var(--brown); display:flex; align-items:center; justify-content:center;">←</button>
+      <div style="font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--brown);">New League</div>
+    </div>
+  </div>
+  <div class="main-card page-body">
+    <div class="field-group">
+      <label class="field-label">League Name</label>
+      <input class="field-input" id="lg-name" placeholder="e.g. Friday Night Showdown" maxlength="50">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Default Buy-In</label>
+      <div class="amount-wrap">
+        <span class="amount-prefix">$</span>
+        <input class="field-input amount-input" id="lg-buyin" type="number" value="20" min="1">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Starting Chips</label>
+      <input class="field-input" id="lg-chips" type="number" value="1000" min="100">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Format</label>
+      <select class="field-input" id="lg-format">
+        <option value="cash">Cash Game</option>
+        <option value="tournament">Tournament</option>
+      </select>
+    </div>
+
+    <div class="sec-head">
+      <div class="section-title" style="font-size:18px;">Families</div>
+      <div class="sec-action" onclick="openModal('modal-family')">+ Add Family</div>
+    </div>
+    <div id="families-list">
+      <div class="empty-state" style="padding:24px 0;">
+        <span class="empty-icon">🏠</span>
+        <div class="empty-title" style="font-size:16px;">No families yet</div>
+        <div class="empty-sub" style="font-size:13px;">Add at least 2 families to play.</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="createLeague()" style="margin-top:20px;">
+      Create League →
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: DASHBOARD
+══════════════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <div style="padding: calc(var(--safe-top) + 60px) 20px 0;">
+    <div id="dash-name" style="font-family:'Fraunces',serif; font-size:30px; font-weight:900; color:var(--brown); letter-spacing:-0.5px;"></div>
+    <div id="dash-sub" style="font-size:13px; color:var(--brown-muted); margin-top:2px; margin-bottom:0;"></div>
+  </div>
+
+  <div class="main-card" style="margin-top:16px; border-radius:var(--r-2xl) var(--r-2xl) 0 0;">
+    <div class="tab-row">
+      <div class="tab-btn active" onclick="switchDashTab('home')"    id="dtab-home">Home</div>
+      <div class="tab-btn"        onclick="switchDashTab('families')" id="dtab-families">Families</div>
+      <div class="tab-btn"        onclick="switchDashTab('sessions')" id="dtab-sessions">Sessions</div>
+      <div class="tab-btn"        onclick="switchDashTab('stats')"    id="dtab-stats">Stats</div>
+    </div>
+    <div id="dash-content" class="page-body"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" id="bn-home" onclick="switchDashTab('home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" id="bn-families" onclick="switchDashTab('families')">
+      <span class="nav-icon">👨‍👩‍👧</span><span class="nav-label">Families</span>
+    </div>
+    <div class="nav-item" id="bn-sessions" onclick="switchDashTab('sessions')">
+      <span class="nav-icon">🎮</span><span class="nav-label">Sessions</span>
+    </div>
+    <div class="nav-item" id="bn-stats" onclick="switchDashTab('stats')">
+      <span class="nav-icon">📊</span><span class="nav-label">Stats</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: SESSION SETUP
+══════════════════════════════════════════════════ -->
+<div id="screen-session-setup" class="screen">
+  <div class="hero" style="padding-bottom:16px; text-align:left;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button onclick="goTo('screen-dashboard'); switchDashTab('home');" style="background:rgba(44,24,16,0.10); border:none; border-radius:50%; width:40px; height:40px; font-size:18px; cursor:pointer; color:var(--brown); display:flex; align-items:center; justify-content:center;">←</button>
+      <div style="font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--brown);">New Session</div>
+    </div>
+  </div>
+  <div class="main-card page-body">
+    <div class="field-group">
+      <label class="field-label">Venue</label>
+      <input class="field-input" id="ss-venue" placeholder="e.g. Marco's House">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Buy-In</label>
+      <div class="amount-wrap">
+        <span class="amount-prefix">$</span>
+        <input class="field-input amount-input" id="ss-buyin" type="number" value="20">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Format</label>
+      <select class="field-input" id="ss-format">
+        <option value="cash">Cash Game</option>
+        <option value="tournament">Tournament</option>
+      </select>
+    </div>
+    <div class="sec-head">
+      <div class="section-title" style="font-size:18px;">Players Tonight</div>
+      <div id="ss-count" style="font-size:13px; color:var(--brown-muted);">0 selected</div>
+    </div>
+    <div id="ss-players"></div>
+    <button class="btn btn-primary" onclick="startSession()" style="margin-top:20px;">
+      🃏 Start Session →
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: LIVE SESSION
+══════════════════════════════════════════════════ -->
+<div id="screen-live" class="screen">
+  <div class="hero" style="padding:calc(var(--safe-top)+8px) 20px 12px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span class="live-dot"></span>
+      <span id="live-timer" style="font-family:'DM Mono',monospace; font-size:14px; font-weight:500; color:var(--brown-mid);"></span>
+    </div>
+    <div id="live-venue" style="font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:var(--brown);"></div>
+    <button onclick="openModal('modal-end-confirm')" style="background:rgba(198,40,40,0.10); color:var(--loss); border:1.5px solid rgba(198,40,40,0.20); border-radius:20px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer;">End</button>
+  </div>
+  <div class="main-card" style="margin-top:0; border-radius:var(--r-2xl) var(--r-2xl) 0 0;">
+    <div class="live-stats" id="live-stats"></div>
+    <div id="live-players" style="padding-bottom:100px;"></div>
+  </div>
+  <div class="action-bar">
+    <div class="action-grid">
+      <div class="action-btn" onclick="openModal('modal-rebuy')"><span>↩</span>Rebuy</div>
+      <div class="action-btn" onclick="openModal('modal-addon')"><span>➕</span>Add-on</div>
+      <div class="action-btn primary-action" onclick="openHandRecorder()"><span>🃏</span>Hand</div>
+      <div class="action-btn" onclick="openChipCount(false)"><span>🔢</span>Count</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: POST-GAME SUMMARY
+══════════════════════════════════════════════════ -->
+<div id="screen-summary" class="screen">
+  <div class="hero" style="padding-bottom:16px; text-align:left; display:flex; align-items:center; justify-content:space-between;">
+    <button onclick="goTo('screen-dashboard'); switchDashTab('home');" style="background:rgba(44,24,16,0.10); border:none; border-radius:50%; width:40px; height:40px; font-size:18px; cursor:pointer; color:var(--brown); display:flex; align-items:center; justify-content:center;">←</button>
+    <div style="font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:var(--brown);">Session Summary</div>
+    <button onclick="shareSession()" style="background:rgba(44,24,16,0.10); border:none; border-radius:20px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; color:var(--brown-mid);">Share</button>
+  </div>
+  <div class="main-card page-body" id="summary-content"></div>
+</div>
+
+</div><!-- end #app -->
+
+<!-- ══════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════ -->
+
+<!-- Add Family -->
+<div class="modal-overlay" id="modal-family">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Family</div>
+    <div class="field-group">
+      <label class="field-label">Family Name</label>
+      <input class="field-input" id="mf-name" placeholder="e.g. The Martins">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Members (comma separated)</label>
+      <input class="field-input" id="mf-members" placeholder="e.g. Marco, Sofia, Leo">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Family Color</label>
+      <div class="color-grid" id="color-grid"></div>
+    </div>
+    <button class="btn btn-primary" onclick="addFamily()" style="margin-bottom:10px;">Add Family</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-family')">Cancel</button>
+  </div>
+</div>
+
+<!-- Rebuy -->
+<div class="modal-overlay" id="modal-rebuy">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Record Rebuy</div>
+    <div class="field-group">
+      <label class="field-label">Player</label>
+      <select class="field-input" id="mr-player"></select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Amount</label>
+      <div class="amount-wrap"><span class="amount-prefix">$</span>
+        <input class="field-input amount-input" id="mr-amount" type="number" value="20">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="confirmRebuy('rebuy')" style="margin-bottom:10px;">Confirm Rebuy</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-rebuy')">Cancel</button>
+  </div>
+</div>
+
+<!-- Add-on -->
+<div class="modal-overlay" id="modal-addon">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Record Add-on</div>
+    <div class="field-group">
+      <label class="field-label">Player</label>
+      <select class="field-input" id="ma-player"></select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Amount</label>
+      <div class="amount-wrap"><span class="amount-prefix">$</span>
+        <input class="field-input amount-input" id="ma-amount" type="number" value="20">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="confirmRebuy('addon')" style="margin-bottom:10px;">Confirm Add-on</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-addon')">Cancel</button>
+  </div>
+</div>
+
+<!-- Record Hand -->
+<div class="modal-overlay" id="modal-hand">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Record Winning Hand</div>
+    <div class="field-group">
+      <label class="field-label">Hand Rank</label>
+      <div class="hand-grid" id="hand-rank-grid"></div>
+      <div id="selected-rank-label" style="text-align:center; font-size:13px; color:var(--fly-deep); font-weight:700; margin-top:8px; min-height:18px;"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Winner</label>
+      <select class="field-input" id="mh-winner"></select>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+      <div class="field-group" style="margin-bottom:0;">
+        <label class="field-label">Pot Size (opt.)</label>
+        <div class="amount-wrap"><span class="amount-prefix">$</span>
+          <input class="field-input amount-input" id="mh-pot" type="number" placeholder="0" style="font-size:16px !important;">
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:0;">
+        <label class="field-label">Cards (opt.)</label>
+        <input class="field-input" id="mh-cards" placeholder="A♠ K♠…" style="font-size:13px;">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Memorable Note (optional)</label>
+      <input class="field-input" id="mh-note" placeholder="e.g. Carlos bluffed with 2-7!">
+    </div>
+    <button class="btn btn-primary" onclick="confirmHand()" style="margin-bottom:10px;">Record Hand</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-hand')">Cancel</button>
+  </div>
+</div>
+
+<!-- Chip Count -->
+<div class="modal-overlay" id="modal-chips">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="chips-modal-title">Chip Count</div>
+    <div style="font-size:13px; color:var(--brown-muted); margin-bottom:20px;" id="chips-modal-sub">Enter each player's current chip count.</div>
+    <div id="chips-players"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--cream-2); border-radius:var(--r-md); margin:16px 0;">
+      <span style="font-size:13px; color:var(--brown-muted); font-weight:600;">Balance Check</span>
+      <span id="chips-balance" class="mono" style="font-size:14px; color:var(--brown-muted);"></span>
+    </div>
+    <button class="btn btn-primary" id="chips-confirm-btn" onclick="confirmChipCount()" style="margin-bottom:10px;">Calculate Results →</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-chips')">Cancel</button>
+  </div>
+</div>
+
+<!-- End Confirm -->
+<div class="modal-overlay" id="modal-end-confirm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">End Session?</div>
+    <div style="font-size:14px; color:var(--brown-muted); margin-bottom:24px; line-height:1.6;">Enter final chip counts to calculate results and settlements.</div>
+    <button class="btn btn-danger" onclick="endSession()" style="margin-bottom:10px;">End & Calculate Settlements</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-end-confirm')">Keep Playing</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="confetti-wrap" id="confetti"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+// ── CONSTANTS ──────────────────────────────────────
+const HAND_RANKS = [
+  {key:'royal_flush',    icon:'👑', name:'Royal Flush',     rare:true },
+  {key:'straight_flush', icon:'🌟', name:'Straight Flush',  rare:true },
+  {key:'four_of_a_kind', icon:'🔮', name:'Four of a Kind',  rare:true },
+  {key:'full_house',     icon:'🏠', name:'Full House',      rare:false},
+  {key:'flush',          icon:'♠',  name:'Flush',           rare:false},
+  {key:'straight',       icon:'→',  name:'Straight',        rare:false},
+  {key:'three_of_a_kind',icon:'△',  name:'Three of a Kind', rare:false},
+  {key:'two_pair',       icon:'⊞',  name:'Two Pair',        rare:false},
+  {key:'one_pair',       icon:'○',  name:'One Pair',        rare:false},
+  {key:'high_card',      icon:'↑',  name:'High Card',       rare:false},
+];
+
+const FAM_COLORS = ['#8B2020','#1A3A7A','#4A1A7A','#8B4A1A','#1A4A7A','#4A5A1A','#7A1A3A','#1A5A3A'];
+
+// ── STATE ──────────────────────────────────────────
+let G = {
+  league: null, families: [], sessions: [],
+  selectedColor: FAM_COLORS[0],
+  sessionPlayers: [],
+  currentSession: null,
+  timerInterval: null,
+  selectedHandRank: null,
+  endingGame: false,
+  activeTab: 'home'
+};
+
+// ── HELPERS ──────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const uid = () => Math.random().toString(36).slice(2,9);
+const initials = n => n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const fmtMoney = n => (n>=0?'+':'-')+'$'+Math.abs(n).toFixed(0);
+const fmtAbs   = n => '$'+Math.abs(n).toFixed(0);
+const hexRgba  = (h,a) => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
+const fColor   = fid => G.families.find(f=>f.id===fid)?.color || '#888';
+const formatDate = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+
+// ── NAVIGATION ──────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ── MODALS ──────────────────────────────────────────
+function openModal(id) { $(id).classList.add('show'); }
+function closeModal(id){ $(id).classList.remove('show'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+});
+
+// ── TOAST ──────────────────────────────────────────
+let _tt;
+function toast(msg, dur=2500) {
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+// ── CONFETTI ──────────────────────────────────────────
+function confetti(baseColor='#D4E800') {
+  const c = $('confetti');
+  const cols = [baseColor,'#F5F99A','#2E7D32','#FFF','#E8F000'];
+  for (let i=0;i<60;i++) {
+    const p = document.createElement('div');
+    p.className = 'cp';
+    const sz = 5+Math.random()*9;
+    p.style.cssText = `left:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.4}s;border-radius:${Math.random()>0.5?'50%':'2px'};`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.innerHTML='',3500);
+}
+
+// ── COLOR GRID ──────────────────────────────────────
+function renderColorGrid() {
+  $('color-grid').innerHTML = FAM_COLORS.map((c,i) =>
+    `<div class="color-swatch ${i===0?'selected':''}" style="background:${c}" onclick="pickColor(this,'${c}')"></div>`
+  ).join('');
+}
+function pickColor(el, c) {
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  G.selectedColor = c;
+}
+
+// ── LEAGUE SETUP ──────────────────────────────────────
+function addFamily() {
+  const name    = $('mf-name').value.trim();
+  const members = $('mf-members').value.split(',').map(m=>({id:uid(),name:m.trim(),stats:{sessionsPlayed:0,wins:0,netResult:0,totalInvested:0,rebuys:0,handsWon:0,handsByRank:{}}})).filter(m=>m.name);
+  if (!name) { toast('Enter family name'); return; }
+
+  const used = G.families.map(f=>f.color);
+  const color = G.selectedColor || FAM_COLORS.find(c=>!used.includes(c)) || FAM_COLORS[G.families.length % FAM_COLORS.length];
+
+  G.families.push({ id:uid(), name, members, color, stats:{sessionsPlayed:0,wins:0,netResult:0,rebuys:0} });
+  $('mf-name').value = ''; $('mf-members').value = '';
+  closeModal('modal-family');
+  renderFamiliesList();
+  toast(`${name} added 🏠`);
+}
+
+function removeFam(id) {
+  G.families = G.families.filter(f=>f.id!==id);
+  renderFamiliesList();
+}
+
+function renderFamiliesList() {
+  const el = $('families-list');
+  if (!G.families.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:24px 0;"><span class="empty-icon">🏠</span><div class="empty-title" style="font-size:16px;">No families yet</div><div class="empty-sub" style="font-size:13px;">Add at least 2 families.</div></div>`;
+    return;
+  }
+  el.innerHTML = G.families.map(f=>`
+    <div class="player-card" style="border-left:4px solid ${f.color}; margin-bottom:10px;">
+      <div class="player-row">
+        <div class="avatar avatar-md" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};">${initials(f.name)}</div>
+        <div class="player-info">
+          <div class="player-name">${f.name}</div>
+          <div class="player-meta">${f.members.length} member${f.members.length!==1?'s':''}: ${f.members.map(m=>m.name).join(', ')||'None'}</div>
+        </div>
+        <div onclick="removeFam('${f.id}')" style="font-size:22px;color:var(--brown-faint);cursor:pointer;padding:8px;">×</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function createLeague() {
+  const name = $('lg-name').value.trim();
+  if (!name) { toast('Enter a league name'); return; }
+  if (G.families.length < 2) { toast('Add at least 2 families'); return; }
+  G.league = { id:uid(), name, buyin:parseFloat($('lg-buyin').value)||20, startingChips:parseInt($('lg-chips').value)||1000, format:$('lg-format').value };
+  goTo('screen-dashboard');
+  switchDashTab('home');
+  toast(`${name} created! 🎉`);
+  confetti();
+}
+
+// ── DEMO ──────────────────────────────────────────
+function loadDemo() {
+  G.league = {id:'demo',name:'Friday Night Showdown',buyin:20,startingChips:1000,format:'cash'};
+  G.families = [
+    {id:'f1',name:'The Martins',color:FAM_COLORS[0],members:[
+      {id:'p1',name:'Marco',stats:{sessionsPlayed:12,wins:5,netResult:100,totalInvested:480,rebuys:2,handsWon:18,handsByRank:{full_house:5,flush:4,straight:3,two_pair:4,one_pair:2}}},
+      {id:'p2',name:'Sofia',stats:{sessionsPlayed:10,wins:3,netResult:80,totalInvested:260,rebuys:1,handsWon:12,handsByRank:{flush:3,full_house:2,straight:2,two_pair:3,one_pair:2}}},
+      {id:'p3',name:'Leo',stats:{sessionsPlayed:8,wins:5,netResult:260,totalInvested:220,rebuys:0,handsWon:22,handsByRank:{four_of_a_kind:1,full_house:6,flush:4,straight:4,two_pair:4,one_pair:3}}}
+    ],stats:{sessionsPlayed:12,wins:7,netResult:440,rebuys:3}},
+    {id:'f2',name:'The Garcias',color:FAM_COLORS[1],members:[
+      {id:'p4',name:'Carlos',stats:{sessionsPlayed:12,wins:3,netResult:-80,totalInvested:520,rebuys:5,handsWon:14,handsByRank:{full_house:3,two_pair:5,one_pair:4,straight:2}}},
+      {id:'p5',name:'Isabella',stats:{sessionsPlayed:9,wins:1,netResult:-80,totalInvested:260,rebuys:3,handsWon:8,handsByRank:{two_pair:3,one_pair:4,high_card:1}}},
+      {id:'p6',name:'Diego',stats:{sessionsPlayed:10,wins:1,netResult:-240,totalInvested:360,rebuys:8,handsWon:6,handsByRank:{one_pair:4,two_pair:2}}}
+    ],stats:{sessionsPlayed:12,wins:3,netResult:-400,rebuys:16}},
+    {id:'f3',name:'The Johnsons',color:FAM_COLORS[2],members:[
+      {id:'p7',name:'James',stats:{sessionsPlayed:11,wins:6,netResult:240,totalInvested:380,rebuys:1,handsWon:24,handsByRank:{straight_flush:1,full_house:5,flush:6,straight:5,two_pair:5,one_pair:2}}},
+      {id:'p8',name:'Emma',stats:{sessionsPlayed:10,wins:3,netResult:80,totalInvested:280,rebuys:2,handsWon:14,handsByRank:{full_house:3,flush:3,two_pair:5,one_pair:3}}},
+      {id:'p9',name:'Tyler',stats:{sessionsPlayed:8,wins:1,netResult:-180,totalInvested:300,rebuys:4,handsWon:7,handsByRank:{two_pair:2,one_pair:4,high_card:1}}}
+    ],stats:{sessionsPlayed:11,wins:7,netResult:140,rebuys:7}},
+    {id:'f4',name:'The Patels',color:FAM_COLORS[3],members:[
+      {id:'p10',name:'Raj',stats:{sessionsPlayed:10,wins:2,netResult:-100,totalInvested:340,rebuys:3,handsWon:10,handsByRank:{full_house:2,flush:2,straight:2,two_pair:2,one_pair:2}}},
+      {id:'p11',name:'Priya',stats:{sessionsPlayed:9,wins:2,netResult:-40,totalInvested:240,rebuys:2,handsWon:11,handsByRank:{flush:3,full_house:2,straight:2,two_pair:2,one_pair:2}}},
+      {id:'p12',name:'Aisha',stats:{sessionsPlayed:7,wins:1,netResult:-140,totalInvested:220,rebuys:2,handsWon:5,handsByRank:{one_pair:3,two_pair:2}}}
+    ],stats:{sessionsPlayed:10,wins:3,netResult:-280,rebuys:7}}
+  ];
+  G.sessions = [
+    {id:'s1',number:1,venue:"Marco's House",date:'2024-11-01',buyin:20,format:'cash',status:'completed',duration:195,
+     players:[{playerId:'p1',familyId:'f1',name:'Marco',invested:20,netResult:7},{playerId:'p3',familyId:'f1',name:'Leo',invested:20,netResult:16},{playerId:'p4',familyId:'f2',name:'Carlos',invested:40,netResult:-24},{playerId:'p7',familyId:'f3',name:'James',invested:20,netResult:16},{playerId:'p8',familyId:'f3',name:'Emma',invested:20,netResult:2},{playerId:'p10',familyId:'f4',name:'Raj',invested:20,netResult:-14}],
+     hands:[{winner:'Leo',rank:'full_house',notable:true,note:"Leo's first legendary hand!"},{winner:'James',rank:'straight_flush',notable:true,note:'Incredible river card!'},{winner:'Marco',rank:'straight',notable:false,note:''}],
+     settlement:{transactions:[{from:'The Garcias',fromFamilyId:'f2',to:'The Martins',toFamilyId:'f1',amount:24,paid:false}],allSettled:false}},
+    {id:'s2',number:2,venue:"Carlos's Place",date:'2024-11-15',buyin:20,format:'tournament',status:'completed',duration:245,
+     players:[{playerId:'p1',familyId:'f1',name:'Marco',invested:20,netResult:-20,position:7},{playerId:'p3',familyId:'f1',name:'Leo',invested:20,netResult:60,position:1},{playerId:'p4',familyId:'f2',name:'Carlos',invested:40,netResult:-20,position:6},{playerId:'p7',familyId:'f3',name:'James',invested:20,netResult:20,position:2},{playerId:'p11',familyId:'f4',name:'Priya',invested:20,netResult:20,position:3},{playerId:'p12',familyId:'f4',name:'Aisha',invested:20,netResult:-10,position:5}],
+     hands:[{winner:'Leo',rank:'royal_flush',notable:true,note:'ROYAL FLUSH!! League history made! 👑'},{winner:'James',rank:'four_of_a_kind',notable:true,note:'Four Jacks — table went wild'}],
+     settlement:{transactions:[{from:'The Garcias',fromFamilyId:'f2',to:'The Martins',toFamilyId:'f1',amount:20,paid:true},{from:'The Patels',fromFamilyId:'f4',to:'The Johnsons',toFamilyId:'f3',amount:10,paid:true}],allSettled:true}}
+  ];
+  goTo('screen-dashboard');
+  switchDashTab('home');
+  toast('Demo loaded! 🃏');
+}
+
+// ── DASHBOARD TABS ──────────────────────────────────
+function switchDashTab(tab) {
+  G.activeTab = tab;
+  ['home','families','sessions','stats'].forEach(t => {
+    $(`dtab-${t}`)?.classList.toggle('active', t===tab);
+    $(`bn-${t}`)?.classList.toggle('active', t===tab);
+  });
+  $('dash-name').textContent = G.league?.name || '';
+  $('dash-sub').textContent  = `${G.families.length} families · ${G.sessions.filter(s=>s.status==='completed').length} sessions`;
+  if (tab==='home')     $('dash-content').innerHTML = renderHome();
+  if (tab==='families') $('dash-content').innerHTML = renderFamilies();
+  if (tab==='sessions') $('dash-content').innerHTML = renderSessionsList();
+  if (tab==='stats')    $('dash-content').innerHTML = renderStats();
+}
+
+// ── HOME TAB ──────────────────────────────────────────
+function renderHome() {
+  const standings = getFamilyStandings();
+  const completed = G.sessions.filter(s=>s.status==='completed');
+  const last = completed[completed.length-1];
+  const outstanding = G.sessions.filter(s=>s.status==='completed'&&s.settlement&&!s.settlement.allSettled).flatMap(s=>s.settlement.transactions.filter(t=>!t.paid));
+
+  return `
+    <div class="player-card" style="border-color:rgba(244,179,0,0.3); background:rgba(232,240,0,0.06);">
+      <div class="player-row" style="justify-content:space-between;">
+        <div><div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin-bottom:3px;">Ready to play?</div><div style="font-size:13px;color:var(--brown-muted);">Start tonight's session</div></div>
+        <button class="btn btn-primary btn-sm" onclick="initSessionSetup()">Start →</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">Family Standings</div><div class="sec-action" onclick="switchDashTab('families')">See all</div></div>
+    <div class="player-card">
+      ${standings.slice(0,4).map((f,i)=>{
+        const medals=['🥇','🥈','🥉',''];
+        return `<div class="lb-row" onclick="showFamilyProfile('${f.id}')">
+          <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${medals[i]||(i+1)}</div>
+          <div class="avatar avatar-sm" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};">${initials(f.name)}</div>
+          <div class="lb-info"><div class="lb-name">${f.name}</div><div class="lb-sub">${f.wins}W · ${f.sessionsPlayed} played</div></div>
+          <div class="lb-amount ${f.netResult>=0?'text-green':'text-red'}" style="color:${f.netResult>=0?'var(--win)':'var(--loss)'}">${fmtMoney(f.netResult)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${last?`
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">Last Session</div><div class="sec-action" onclick="switchDashTab('sessions')">History</div></div>
+    <div class="player-card" onclick="viewSession('${last.id}')" style="cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div><div style="font-weight:700;font-size:15px;">Session #${last.number} · ${last.venue}</div><div style="font-size:12px;color:var(--brown-muted);margin-top:2px;">${formatDate(last.date)} · ${last.duration}min</div></div>
+        <span class="badge badge-firefly">${last.format.toUpperCase()}</span>
+      </div>
+      ${getWinner(last)?`<div style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(244,179,0,0.08);border-radius:var(--r-sm);border:1px solid rgba(244,179,0,0.15);">🏆<div><div style="font-size:11px;color:var(--brown-muted);">Champion</div><div style="font-size:15px;font-weight:700;color:var(--fly-deep);">${getWinner(last)}</div></div></div>`:''}
+    </div>`:''}
+
+    ${outstanding.length?`
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">⚠️ Outstanding</div><span class="badge badge-pending">${outstanding.length} pending</span></div>
+    <div class="player-card" style="border-color:rgba(230,81,0,0.2);">
+      ${outstanding.map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--cream-border);">
+        <div style="font-size:13px;font-weight:600;">${t.from} <span style="color:var(--brown-muted);">→</span> ${t.to}</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="mono" style="color:var(--pending)">${fmtAbs(t.amount)}</span><span class="badge badge-pending">Pending</span></div>
+      </div>`).join('')}
+    </div>`:''}
+  `;
+}
+
+// ── FAMILIES TAB ──────────────────────────────────────
+function renderFamilies() {
+  const standings = getFamilyStandings();
+  return standings.map((f,i)=>{
+    const medals=['🥇','🥈','🥉'];
+    const wr = f.sessionsPlayed>0?Math.round(f.wins/f.sessionsPlayed*100):0;
+    return `<div class="player-card" style="border-left:4px solid ${f.color};margin-bottom:12px;cursor:pointer;" onclick="showFamilyProfile('${f.id}')">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <div class="avatar avatar-lg" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};border-width:2px;">${initials(f.name)}</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;">${f.name}</span>${medals[i]||''}</div>
+          <div style="font-size:12px;color:var(--brown-muted);">${f.members.map(m=>m.name).join(' · ')}</div>
+        </div>
+        <div style="text-align:right;"><div class="mono ${f.netResult>=0?'':'text-loss'}" style="font-size:20px;font-weight:500;color:${f.netResult>=0?'var(--win)':'var(--loss)'};">${fmtMoney(f.netResult)}</div><div style="font-size:11px;color:var(--brown-muted);">all-time</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div style="text-align:center;padding:8px;background:var(--cream-2);border-radius:var(--r-sm);"><div class="mono" style="font-size:16px;">${f.sessionsPlayed}</div><div style="font-size:10px;color:var(--brown-muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Played</div></div>
+        <div style="text-align:center;padding:8px;background:var(--cream-2);border-radius:var(--r-sm);"><div class="mono" style="font-size:16px;color:var(--win);">${f.wins}</div><div style="font-size:10px;color:var(--brown-muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Wins</div></div>
+        <div style="text-align:center;padding:8px;background:var(--cream-2);border-radius:var(--r-sm);"><div class="mono" style="font-size:16px;color:var(--fly-deep);">${wr}%</div><div style="font-size:10px;color:var(--brown-muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Win Rate</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SESSIONS LIST TAB ──────────────────────────────────
+function renderSessionsList() {
+  const completed = [...G.sessions].filter(s=>s.status==='completed').reverse();
+  return `<button class="btn btn-primary" onclick="initSessionSetup()" style="margin-bottom:20px;">+ Start New Session</button>
+  ${completed.length?completed.map(s=>{
+    const totalPot = s.players.reduce((sum,p)=>sum+p.invested,0);
+    const w = getWinner(s);
+    return `<div class="player-card" style="cursor:pointer;margin-bottom:10px;" onclick="viewSession('${s.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div><div style="font-weight:700;font-size:15px;">Session #${s.number} · ${s.venue}</div><div style="font-size:12px;color:var(--brown-muted);margin-top:2px;">${formatDate(s.date)} · ${s.duration}min · ${s.players.length} players</div></div>
+        <span class="badge badge-firefly" style="font-size:10px;">${s.format.toUpperCase()}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        ${w?`<div style="display:flex;align-items:center;gap:6px;">🏆<span style="font-size:14px;font-weight:700;color:var(--fly-deep);">${w}</span></div>`:'<div></div>'}
+        <span class="mono" style="font-size:13px;color:var(--brown-muted);">Pot: ${fmtAbs(totalPot)}</span>
+      </div>
+      ${s.hands?.some(h=>h.notable)?`<div style="margin-top:10px;padding:7px 10px;background:rgba(244,179,0,0.08);border-radius:var(--r-sm);border:1px solid rgba(244,179,0,0.15);font-size:12px;color:var(--fly-deep);font-weight:600;">⭐ ${s.hands.filter(h=>h.notable).length} notable hand${s.hands.filter(h=>h.notable).length!==1?'s':''}</div>`:''}
+    </div>`;
+  }).join(''):`<div class="empty-state"><span class="empty-icon">🎮</span><div class="empty-title">No sessions yet</div><div class="empty-sub">Start your first session above.</div></div>`}`;
+}
+
+// ── STATS TAB ──────────────────────────────────────────
+function renderStats() {
+  const allPlayers = G.families.flatMap(f=>f.members.map(m=>({...m,familyName:f.name,familyColor:f.color})));
+  allPlayers.sort((a,b)=>b.stats.netResult-a.stats.netResult);
+  const handTotals = {};
+  HAND_RANKS.forEach(r=>handTotals[r.key]=0);
+  G.sessions.forEach(s=>s.hands?.forEach(h=>{ if(handTotals.hasOwnProperty(h.rank)) handTotals[h.rank]++; }));
+  const total = Object.values(handTotals).reduce((a,b)=>a+b,0);
+  const royalCount = handTotals['royal_flush'];
+
+  return `
+    <div class="sec-head" style="margin-top:4px;"><div class="section-title" style="font-size:18px;">Top Players</div></div>
+    <div class="player-card">
+      ${allPlayers.slice(0,6).map((p,i)=>{
+        const net=p.stats.netResult;
+        return `<div class="lb-row" onclick="showPlayerProfile('${p.id}')">
+          <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}" style="font-size:18px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+          <div class="avatar avatar-sm" style="background:${hexRgba(p.familyColor,0.18)};color:${p.familyColor};border-color:${p.familyColor};">${initials(p.name)}</div>
+          <div class="lb-info"><div class="lb-name">${p.name}</div><div class="lb-sub">${p.familyName} · ${p.stats.sessionsPlayed} sessions</div></div>
+          <span class="result-pill ${net>=0?'win':'loss'}">${fmtMoney(net)}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">🃏 Winning Hands</div><span style="font-size:12px;color:var(--brown-muted);">${total} recorded</span></div>
+    <div class="player-card">
+      ${royalCount===0&&total>0?`<div style="text-align:center;padding:14px;background:rgba(244,179,0,0.08);border-radius:var(--r-md);border:1px solid rgba(244,179,0,0.2);margin-bottom:14px;"><div style="font-size:28px;margin-bottom:6px;">👑</div><div style="font-size:13px;font-weight:700;color:var(--fly-deep);">No Royal Flush yet — ${G.sessions.filter(s=>s.status==='completed').length} sessions and counting…</div></div>`:''}
+      ${total===0?`<div style="text-align:center;padding:20px;color:var(--brown-muted);font-size:14px;">Record hands during live sessions to see stats.</div>`:
+        HAND_RANKS.filter(r=>handTotals[r.key]>0).map(r=>{
+          const pct = total>0?handTotals[r.key]/total*100:0;
+          return `<div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">${r.icon}</span><span style="font-size:13px;font-weight:600;">${r.name}</span></div>
+              <span class="mono" style="font-size:12px;color:var(--brown-muted);">${handTotals[r.key]}×</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join('')
+      }
+    </div>
+
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">League Records</div></div>
+    <div class="stats-grid">
+      ${renderRecords()}
+    </div>
+    <a href="/hand-history.html" class="btn btn-firefly" style="margin-top:8px; text-decoration:none;">
+      📜 Full Hand History →
+    </a>
+  `;
+}
+
+function renderRecords() {
+  const all = G.families.flatMap(f=>f.members);
+  const best  = [...all].sort((a,b)=>b.stats.netResult-a.stats.netResult)[0];
+  const mostW = [...all].sort((a,b)=>b.stats.wins-a.stats.wins)[0];
+  const mostR = [...all].sort((a,b)=>b.stats.rebuys-a.stats.rebuys)[0];
+  const total = G.sessions.filter(s=>s.status==='completed').length;
+  return `
+    <div class="stat-tile"><div class="stat-label">🌟 Top Earner</div><div class="stat-value firefly" style="font-size:16px;">${best?.name||'—'}</div><div style="font-size:11px;color:var(--brown-muted);margin-top:2px;">${best?fmtMoney(best.stats.netResult):''}</div></div>
+    <div class="stat-tile"><div class="stat-label">🏆 Most Wins</div><div class="stat-value" style="font-size:16px;">${mostW?.name||'—'}</div><div style="font-size:11px;color:var(--brown-muted);margin-top:2px;">${mostW?mostW.stats.wins+' wins':''}</div></div>
+    <div class="stat-tile"><div class="stat-label">↩ Most Rebuys</div><div class="stat-value loss" style="font-size:16px;">${mostR?.name||'—'}</div><div style="font-size:11px;color:var(--brown-muted);margin-top:2px;">${mostR?mostR.stats.rebuys+' total 😅':''}</div></div>
+    <div class="stat-tile"><div class="stat-label">📅 Sessions</div><div class="stat-value">${total}</div><div style="font-size:11px;color:var(--brown-muted);margin-top:2px;">completed</div></div>
+  `;
+}
+
+// ── FAMILY PROFILE ──────────────────────────────────────
+function showFamilyProfile(fid) {
+  const f = G.families.find(x=>x.id===fid);
+  if (!f) return;
+  const wr = f.stats.sessionsPlayed>0?Math.round(f.stats.wins/f.stats.sessionsPlayed*100):0;
+  const fSessions = G.sessions.filter(s=>s.status==='completed'&&s.players.some(p=>p.familyId===fid));
+
+  // Find rival
+  const rivals={};
+  fSessions.forEach(s=>s.players.forEach(p=>{if(p.familyId!==fid)rivals[p.familyId]=(rivals[p.familyId]||0)+1;}));
+  const rivalId=Object.entries(rivals).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  const rival=rivalId?G.families.find(x=>x.id===rivalId):null;
+
+  $('dash-content').innerHTML = `
+    <button onclick="switchDashTab('families')" style="background:rgba(44,24,16,0.08);border:none;border-radius:var(--r-sm);padding:8px 14px;font-size:13px;font-weight:700;color:var(--brown-mid);cursor:pointer;margin-bottom:20px;">← Families</button>
+    <div style="text-align:center;padding:0 0 24px;border-bottom:1px solid var(--cream-border);margin-bottom:20px;">
+      <div class="avatar avatar-lg" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};border-width:3px;font-size:22px;margin:0 auto 14px;">${initials(f.name)}</div>
+      <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:700;">${f.name}</div>
+      <div class="mono ${f.stats.netResult>=0?'':'text-loss'}" style="font-size:26px;font-weight:500;margin-top:8px;color:${f.stats.netResult>=0?'var(--win)':'var(--loss)'};">${fmtMoney(f.stats.netResult)}</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-label">Sessions</div><div class="stat-value">${f.stats.sessionsPlayed}</div></div>
+      <div class="stat-tile"><div class="stat-label">Wins</div><div class="stat-value win">${f.stats.wins}</div></div>
+      <div class="stat-tile"><div class="stat-label">Win Rate</div><div class="stat-value firefly">${wr}%</div></div>
+      <div class="stat-tile"><div class="stat-label">Rebuys</div><div class="stat-value">${f.members.reduce((s,m)=>s+(m.stats?.rebuys||0),0)}</div></div>
+    </div>
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">Members</div></div>
+    <div class="player-card">
+      ${f.members.map(m=>{
+        const net=m.stats?.netResult||0;
+        return `<div class="lb-row" onclick="showPlayerProfile('${m.id}')">
+          <div class="avatar avatar-sm" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};">${initials(m.name)}</div>
+          <div class="lb-info"><div class="lb-name">${m.name}</div><div class="lb-sub">${m.stats?.sessionsPlayed||0} sessions · ${m.stats?.wins||0} wins</div></div>
+          <span class="result-pill ${net>=0?'win':'loss'}">${fmtMoney(net)}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    ${rival?`<div class="sec-head"><div class="section-title" style="font-size:18px;">⚔️ Top Rivalry</div></div>
+    <div class="player-card" style="border-left:4px solid ${rival.color};cursor:pointer;" onclick="showFamilyProfile('${rival.id}')">
+      <div style="text-align:center;">
+        <div style="font-size:13px;color:var(--brown-muted);margin-bottom:8px;">vs ${rival.name}</div>
+        <div class="mono" style="font-size:26px;color:var(--brown);">${fSessions.filter(s=>s.players.some(p=>p.familyId===rivalId)).filter(s=>s.players.filter(p=>p.familyId===fid).reduce((sum,p)=>sum+p.netResult,0)>0).length} — ${fSessions.filter(s=>s.players.some(p=>p.familyId===rivalId)).filter(s=>s.players.filter(p=>p.familyId===fid).reduce((sum,p)=>sum+p.netResult,0)<=0).length}</div>
+      </div>
+    </div>`:''}
+    ${fSessions.length?`<div class="sec-head"><div class="section-title" style="font-size:18px;">Recent Sessions</div></div>
+    <div class="player-card">
+      ${fSessions.slice(-4).reverse().map(s=>{
+        const fNet=s.players.filter(p=>p.familyId===fid).reduce((sum,p)=>sum+p.netResult,0);
+        return `<div class="lb-row" onclick="viewSession('${s.id}')">
+          <div class="lb-info"><div class="lb-name">Session #${s.number} · ${s.venue}</div><div class="lb-sub">${formatDate(s.date)}</div></div>
+          <span class="result-pill ${fNet>=0?'win':'loss'}">${fmtMoney(fNet)}</span>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+  `;
+}
+
+// ── PLAYER PROFILE ──────────────────────────────────────
+function showPlayerProfile(pid) {
+  let player=null, pFamily=null;
+  G.families.forEach(f=>{const m=f.members.find(x=>x.id===pid);if(m){player=m;pFamily=f;}});
+  if(!player) return;
+  const s=player.stats||{};
+  const wr=s.sessionsPlayed>0?Math.round(s.wins/s.sessionsPlayed*100):0;
+  const handsByRank=s.handsByRank||{};
+  const bestH=Object.entries(handsByRank).sort((a,b)=>b[1]-a[1])[0];
+  const bestRank=bestH?HAND_RANKS.find(r=>r.key===bestH[0]):null;
+
+  $('dash-content').innerHTML = `
+    <button onclick="showFamilyProfile('${pFamily.id}')" style="background:rgba(44,24,16,0.08);border:none;border-radius:var(--r-sm);padding:8px 14px;font-size:13px;font-weight:700;color:var(--brown-mid);cursor:pointer;margin-bottom:20px;">← ${pFamily.name}</button>
+    <div style="text-align:center;padding:0 0 24px;border-bottom:1px solid var(--cream-border);margin-bottom:20px;">
+      <div class="avatar avatar-lg" style="background:${hexRgba(pFamily.color,0.18)};color:${pFamily.color};border-color:${pFamily.color};border-width:3px;font-size:22px;margin:0 auto 14px;">${initials(player.name)}</div>
+      <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:700;">${player.name}</div>
+      <div style="font-size:13px;color:var(--brown-muted);margin-top:4px;">${pFamily.name}</div>
+      <div class="mono ${(s.netResult||0)>=0?'':'text-loss'}" style="font-size:26px;font-weight:500;margin-top:8px;color:${(s.netResult||0)>=0?'var(--win)':'var(--loss)'};">${fmtMoney(s.netResult||0)}</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-label">Sessions</div><div class="stat-value">${s.sessionsPlayed||0}</div></div>
+      <div class="stat-tile"><div class="stat-label">Wins</div><div class="stat-value win">${s.wins||0}</div></div>
+      <div class="stat-tile"><div class="stat-label">Win Rate</div><div class="stat-value firefly">${wr}%</div></div>
+      <div class="stat-tile"><div class="stat-label">Rebuys</div><div class="stat-value">${s.rebuys||0}</div></div>
+      <div class="stat-tile"><div class="stat-label">Hands Won</div><div class="stat-value">${s.handsWon||0}</div></div>
+      <div class="stat-tile"><div class="stat-label">Invested</div><div class="stat-value" style="font-size:16px;">${fmtAbs(s.totalInvested||0)}</div></div>
+    </div>
+    ${bestRank?`<div class="sec-head"><div class="section-title" style="font-size:18px;">🃏 Signature Hand</div></div>
+    <div class="player-card" style="text-align:center;padding:24px;border-color:rgba(244,179,0,0.25);">
+      <div style="font-size:48px;margin-bottom:8px;">${bestRank.icon}</div>
+      <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--fly-deep);">${bestRank.name}</div>
+      <div style="font-size:13px;color:var(--brown-muted);margin-top:6px;">${bestH[1]}× recorded</div>
+    </div>`:''}
+    ${Object.keys(handsByRank).length>0?`<div class="sec-head"><div class="section-title" style="font-size:18px;">Winning Hands</div></div>
+    <div class="player-card">
+      ${HAND_RANKS.filter(r=>handsByRank[r.key]>0).map(r=>{
+        const cnt=handsByRank[r.key];const tot=s.handsWon||1;
+        return `<div style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">${r.icon}</span><span style="font-size:13px;font-weight:600;">${r.name}</span></div><span class="mono" style="font-size:12px;color:var(--brown-muted);">${cnt}×</span></div><div class="progress-track"><div class="progress-fill" style="width:${cnt/tot*100}%"></div></div></div>`;
+      }).join('')}
+    </div>`:''}
+  `;
+}
+
+// ── SESSION SETUP ──────────────────────────────────────
+function initSessionSetup() {
+  $('ss-buyin').value = G.league.buyin;
+  $('ss-format').value = G.league.format;
+  G.sessionPlayers = [];
+  $('ss-count').textContent = '0 selected';
+
+  let html = '';
+  G.families.forEach(f => {
+    html += `<div style="margin-bottom:16px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="width:10px;height:10px;border-radius:50%;background:${f.color};"></div><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--brown-muted);">${f.name}</span></div>`;
+    f.members.forEach(m => {
+      html += `<div class="player-card" style="border-left:3px solid ${f.color};margin-bottom:8px;cursor:pointer;padding:14px;" onclick="togglePlayer(this,'${m.id}','${f.id}','${m.name}')">
+        <div class="player-row">
+          <div class="avatar avatar-sm" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};">${initials(m.name)}</div>
+          <div class="player-info"><div class="player-name">${m.name}</div></div>
+          <div id="chk-${m.id}" style="width:26px;height:26px;border-radius:50%;border:2px solid var(--cream-border2);background:var(--cream-2);display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:14px;font-weight:800;"></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  $('ss-players').innerHTML = html;
+  goTo('screen-session-setup');
+}
+
+function togglePlayer(card, pid, fid, name) {
+  const chk = $(`chk-${pid}`);
+  const idx = G.sessionPlayers.findIndex(p=>p.playerId===pid);
+  if (idx>=0) {
+    G.sessionPlayers.splice(idx,1);
+    chk.textContent=''; chk.style.background='var(--cream-2)'; chk.style.borderColor='var(--cream-border2)';
+    card.style.background='var(--cream-card)';
+  } else {
+    G.sessionPlayers.push({playerId:pid,familyId:fid,name,invested:parseFloat($('ss-buyin').value)||20,rebuys:0});
+    chk.textContent='✓'; chk.style.background='var(--brown)'; chk.style.borderColor='var(--brown)'; chk.style.color='var(--fly-light)';
+    card.style.background='var(--cream)';
+  }
+  $('ss-count').textContent = G.sessionPlayers.length+' selected';
+}
+
+function startSession() {
+  if (G.sessionPlayers.length<2) { toast('Select at least 2 players'); return; }
+  G.currentSession = {
+    id:uid(), number:G.sessions.length+1,
+    venue:$('ss-venue').value.trim()||'Home Game',
+    buyin:parseFloat($('ss-buyin').value)||20,
+    format:$('ss-format').value, status:'active',
+    date:new Date().toISOString().split('T')[0],
+    startedAt:Date.now(), duration:0,
+    players:G.sessionPlayers.map(p=>({...p,finalChips:null,netResult:null,position:null})),
+    hands:[], financialEvents:[]
+  };
+  renderLiveSession();
+  goTo('screen-live');
+  startTimer();
+}
+
+function startTimer() {
+  if (G.timerInterval) clearInterval(G.timerInterval);
+  $('live-venue').textContent = G.currentSession.venue;
+  G.timerInterval = setInterval(()=>{
+    const e=Math.floor((Date.now()-G.currentSession.startedAt)/1000);
+    const el=$('live-timer');
+    if(el) el.textContent=`${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`;
+  },1000);
+}
+
+function renderLiveSession() {
+  const totalPot = G.currentSession.players.reduce((s,p)=>s+p.invested,0);
+  $('live-stats').innerHTML = `
+    <div class="live-stat"><div class="live-stat-val firefly">${fmtAbs(totalPot)}</div><div class="live-stat-label">Total Pot</div></div>
+    <div class="live-stat"><div class="live-stat-val">${G.currentSession.players.length}</div><div class="live-stat-label">Players</div></div>
+    <div class="live-stat"><div class="live-stat-val firefly">${G.currentSession.hands.length}</div><div class="live-stat-label">Hands</div></div>
+  `;
+  $('live-players').innerHTML = G.currentSession.players.map(p=>{
+    const fc=fColor(p.familyId);
+    const fam=G.families.find(f=>f.id===p.familyId);
+    return `<div class="player-card" style="border-left:4px solid ${fc};margin-bottom:8px;">
+      <div class="player-row">
+        <div class="avatar avatar-md" style="background:${hexRgba(fc,0.18)};color:${fc};border-color:${fc};">${initials(p.name)}</div>
+        <div class="player-info">
+          <div class="player-name">${p.name}</div>
+          <div class="player-meta">${fam?.name||''} ${p.rebuys>0?`· <span style="color:var(--pending);">${p.rebuys} rebuy${p.rebuys>1?'s':''}</span>`:''}</div>
+        </div>
+        <div style="text-align:right;"><div class="mono" style="font-size:17px;font-weight:500;color:var(--fly-deep);">${fmtAbs(p.invested)}</div><div style="font-size:11px;color:var(--brown-muted);">invested</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── REBUY / ADDON ──────────────────────────────────────
+function confirmRebuy(type) {
+  const modalId = type==='rebuy'?'modal-rebuy':'modal-addon';
+  const playerId = $(type==='rebuy'?'mr-player':'ma-player').value;
+  const amount = parseFloat($(type==='rebuy'?'mr-amount':'ma-amount').value)||0;
+  if (!amount) { toast('Enter valid amount'); return; }
+  const p = G.currentSession.players.find(x=>x.playerId===playerId);
+  if (p) { p.invested+=amount; p.rebuys++; }
+  closeModal(modalId);
+  renderLiveSession();
+  toast(`${type==='rebuy'?'Rebuy':'Add-on'} recorded for ${p?.name} 💰`);
+}
+
+function populateLivePlayerSelects() {
+  const opts = G.currentSession.players.map(p=>`<option value="${p.playerId}">${p.name}</option>`).join('');
+  $('mr-player').innerHTML = opts;
+  $('ma-player').innerHTML = opts;
+  $('mh-winner').innerHTML = opts;
+}
+
+// ── HAND RECORDER ──────────────────────────────────────
+function openHandRecorder() {
+  G.selectedHandRank = null;
+  populateLivePlayerSelects();
+  $('mh-pot').value=''; $('mh-cards').value=''; $('mh-note').value='';
+  renderHandRankGrid();
+  $('selected-rank-label').textContent = '';
+  openModal('modal-hand');
+}
+
+function renderHandRankGrid() {
+  $('hand-rank-grid').innerHTML = HAND_RANKS.map(r=>`
+    <div class="hand-btn ${G.selectedHandRank===r.key?'selected':''}" onclick="pickRank('${r.key}')">
+      <span class="h-icon">${r.icon}</span>
+      <span class="h-name">${r.name.split(' ').slice(0,2).join(' ')}</span>
+    </div>`).join('');
+}
+
+function pickRank(key) {
+  G.selectedHandRank = key;
+  renderHandRankGrid();
+  const r=HAND_RANKS.find(x=>x.key===key);
+  $('selected-rank-label').textContent = `${r.icon} ${r.name}`;
+  if(r.rare) confetti('#D4E800');
+}
+
+function confirmHand() {
+  if (!G.selectedHandRank) { toast('Select a hand rank'); return; }
+  const winnerId = $('mh-winner').value;
+  const winner = G.currentSession.players.find(p=>p.playerId===winnerId);
+  const r = HAND_RANKS.find(x=>x.key===G.selectedHandRank);
+  G.currentSession.hands.push({
+    winner:winner?.name, winnerId,
+    rank:G.selectedHandRank, desc:r?.name,
+    pot:parseFloat($('mh-pot').value)||0,
+    cards:$('mh-cards').value.trim(),
+    notable:$('mh-note').value.trim().length>0,
+    note:$('mh-note').value.trim(),
+    time:Date.now()
+  });
+  closeModal('modal-hand');
+  renderLiveSession();
+  const msg = G.selectedHandRank==='royal_flush'?'👑 ROYAL FLUSH!! LEGENDARY!':G.selectedHandRank==='straight_flush'?'🌟 Straight Flush!':G.selectedHandRank==='four_of_a_kind'?'🔮 Four of a Kind!':r?.name+' for '+winner?.name;
+  toast(msg, r?.rare?4000:2500);
+  if(r?.rare){confetti('#D4E800');setTimeout(()=>confetti('#F5F99A'),400);}
+}
+
+// ── CHIP COUNT ──────────────────────────────────────────
+function openChipCount(ending=false) {
+  G.endingGame = ending;
+  $('chips-modal-title').textContent = ending?'Final Chip Count':'Mid-Game Snapshot';
+  $('chips-modal-sub').textContent   = ending?'Enter each player\'s chips to calculate results.':'Record current counts as a snapshot.';
+  $('chips-confirm-btn').textContent = ending?'Calculate Results →':'Save Snapshot';
+
+  const cpv = G.league.startingChips/G.league.buyin;
+  const totalChipsInPlay = G.currentSession.players.reduce((s,p)=>s+p.invested,0)*cpv;
+
+  $('chips-players').innerHTML = G.currentSession.players.map(p=>{
+    const def = Math.round(p.invested*cpv);
+    return `<div class="chip-row">
+      <div style="flex:1;font-size:15px;font-weight:700;">${p.name}</div>
+      <span style="font-size:12px;color:var(--brown-muted);margin-right:8px;">${fmtAbs(p.invested)}</span>
+      <div class="count-controls">
+        <button class="count-btn" onclick="adjustChips('${p.playerId}',-10)">−</button>
+        <input type="number" id="chip-${p.playerId}" value="${def}" min="0" style="width:80px;text-align:center;background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:var(--r-sm);padding:8px;font-family:'DM Mono',monospace;font-size:16px;color:var(--brown);outline:none;" oninput="checkBalance(${totalChipsInPlay})">
+        <button class="count-btn" onclick="adjustChips('${p.playerId}',10)">+</button>
+      </div>
+    </div>`;
+  }).join('');
+  checkBalance(totalChipsInPlay);
+  openModal('modal-chips');
+}
+
+function adjustChips(pid, delta) {
+  const el = $(`chip-${pid}`);
+  if(el) el.value = Math.max(0, parseInt(el.value||0)+delta);
+  const cpv=G.league.startingChips/G.league.buyin;
+  checkBalance(G.currentSession.players.reduce((s,p)=>s+p.invested,0)*cpv);
+}
+
+function checkBalance(expected) {
+  let entered=0;
+  G.currentSession.players.forEach(p=>{entered+=parseInt($(`chip-${p.playerId}`)?.value||0);});
+  const diff=entered-expected;
+  const el=$('chips-balance');
+  if(Math.abs(diff)<5){el.textContent='✓ Balanced';el.style.color='var(--win)';}
+  else{el.textContent=`${diff>0?'+':''}${Math.round(diff)} (${diff>0?'over':'under'})`;el.style.color='var(--loss)';}
+}
+
+function confirmChipCount() {
+  if (!G.endingGame) { closeModal('modal-chips'); toast('Snapshot saved ✓'); return; }
+  const cpv=G.league.startingChips/G.league.buyin;
+  G.currentSession.players.forEach(p=>{
+    const chips=parseInt($(`chip-${p.playerId}`)?.value||0);
+    p.finalChips=chips; p.finalAmount=chips/cpv;
+    p.netResult=Math.round((p.finalAmount-p.invested)*100)/100;
+  });
+  clearInterval(G.timerInterval);
+  G.currentSession.duration=Math.floor((Date.now()-G.currentSession.startedAt)/60000);
+  G.currentSession.status='completed';
+  G.currentSession.settlement=calculateSettlement();
+  updateStats();
+  G.sessions.push(G.currentSession);
+  closeModal('modal-chips');
+  renderSummaryScreen();
+  goTo('screen-summary');
+  setTimeout(confetti,500);
+}
+
+// ── SETTLEMENT ──────────────────────────────────────────
+function calculateSettlement() {
+  const famNets={};
+  const famInfo={};
+  G.families.forEach(f=>{famNets[f.id]=0;famInfo[f.id]=f;});
+  G.currentSession.players.forEach(p=>{if(famNets.hasOwnProperty(p.familyId))famNets[p.familyId]+=p.netResult;});
+
+  const balances = Object.entries(famNets)
+    .filter(([fid])=>G.currentSession.players.some(p=>p.familyId===fid))
+    .map(([fid,net])=>({id:fid,name:famInfo[fid].name,net:Math.round(net*100)/100}));
+
+  const creds=[...balances.filter(b=>b.net>0.01)].sort((a,b)=>b.net-a.net).map(b=>({...b,rem:b.net}));
+  const debts=[...balances.filter(b=>b.net<-0.01)].sort((a,b)=>b.net-a.net).map(b=>({...b,rem:Math.abs(b.net)}));
+
+  const txns=[]; let ci=0,di=0;
+  while(ci<creds.length&&di<debts.length){
+    const c=creds[ci],d=debts[di];
+    const amt=Math.round(Math.min(c.rem,d.rem)*100)/100;
+    if(amt>0.01) txns.push({from:d.name,fromFamilyId:d.id,to:c.name,toFamilyId:c.id,amount:amt,paid:false});
+    c.rem-=amt; d.rem-=amt;
+    if(c.rem<0.01)ci++; if(d.rem<0.01)di++;
+  }
+  return {transactions:txns,allSettled:txns.length===0};
+}
+
+function updateStats() {
+  const s=G.currentSession;
+  const famNets={};
+  s.players.forEach(p=>{
+    const fam=G.families.find(f=>f.id===p.familyId);
+    if(!fam) return;
+    const mem=fam.members.find(m=>m.id===p.playerId);
+    if(!mem) return;
+    mem.stats.sessionsPlayed++;
+    mem.stats.totalInvested+=p.invested;
+    mem.stats.netResult+=p.netResult;
+    if(p.netResult>0)mem.stats.wins++;
+    mem.stats.rebuys+=p.rebuys||0;
+    if(!famNets[p.familyId])famNets[p.familyId]=0;
+    famNets[p.familyId]+=p.netResult;
+  });
+  s.hands.forEach(h=>{
+    if(!h.winnerId)return;
+    const fam=G.families.find(f=>f.members.some(m=>m.id===h.winnerId));
+    const mem=fam?.members.find(m=>m.id===h.winnerId);
+    if(!mem)return;
+    mem.stats.handsWon++;
+    if(!mem.stats.handsByRank)mem.stats.handsByRank={};
+    mem.stats.handsByRank[h.rank]=(mem.stats.handsByRank[h.rank]||0)+1;
+  });
+  Object.entries(famNets).forEach(([fid,net])=>{
+    const fam=G.families.find(f=>f.id===fid);
+    if(!fam)return;
+    fam.stats.sessionsPlayed++;
+    fam.stats.netResult+=net;
+    if(net>0)fam.stats.wins++;
+  });
+}
+
+// ── SUMMARY ──────────────────────────────────────────────
+function renderSummaryScreen() {
+  const s=G.currentSession;
+  const sorted=[...s.players].sort((a,b)=>b.netResult-a.netResult);
+  const winner=sorted[0];
+  const settlement=s.settlement;
+
+  const famResults={};
+  s.players.forEach(p=>{
+    if(!famResults[p.familyId])famResults[p.familyId]={net:0,members:[]};
+    famResults[p.familyId].net+=p.netResult;
+    famResults[p.familyId].members.push(p);
+  });
+  const sortedFams=Object.entries(famResults).map(([fid,d])=>({fid,...d,fam:G.families.find(f=>f.id===fid)})).filter(f=>f.fam).sort((a,b)=>b.net-a.net);
+
+  $('summary-content').innerHTML = `
+    <div class="summary-hero">
+      <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brown-mid);margin-bottom:8px;">Session Champion</div>
+      <div class="summary-champ">${winner.name}</div>
+      <div class="summary-amount">${fmtMoney(winner.netResult)}</div>
+      <div class="summary-meta">${s.venue} · ${s.duration}min · ${s.format}</div>
+    </div>
+
+    <div style="margin-bottom:16px;" id="sum-toggle">
+      <div class="tab-row">
+        <div class="tab-btn active" id="st-family" onclick="toggleSumView('family')">Family</div>
+        <div class="tab-btn" id="st-individual" onclick="toggleSumView('individual')">Individual</div>
+      </div>
+    </div>
+
+    <div id="sum-family" class="player-card">
+      ${sortedFams.map((f,i)=>`
+        <div class="lb-row">
+          <div style="font-size:18px;width:28px;">${['🥇','🥈','🥉'][i]||(i+1)}</div>
+          <div class="avatar avatar-sm" style="background:${hexRgba(f.fam.color,0.18)};color:${f.fam.color};border-color:${f.fam.color};">${initials(f.fam.name)}</div>
+          <div class="lb-info"><div class="lb-name">${f.fam.name}</div><div class="lb-sub">${f.members.map(m=>m.name).join(', ')}</div></div>
+          <span class="result-pill ${f.net>=0?'win':'loss'}">${fmtMoney(f.net)}</span>
+        </div>`).join('')}
+    </div>
+
+    <div id="sum-individual" style="display:none;" class="player-card">
+      ${sorted.map((p,i)=>{
+        const fc=fColor(p.familyId);
+        return `<div class="lb-row">
+          <div style="font-size:16px;width:28px;">${['🥇','🥈','🥉'][i]||(i+1)}</div>
+          <div class="avatar avatar-sm" style="background:${hexRgba(fc,0.18)};color:${fc};border-color:${fc};">${initials(p.name)}</div>
+          <div class="lb-info"><div class="lb-name">${p.name}</div><div class="lb-sub">${fmtAbs(p.invested)} invested${p.rebuys>0?` · ${p.rebuys} rebuys`:''}</div></div>
+          <span class="result-pill ${p.netResult>=0?'win':'loss'}">${fmtMoney(p.netResult)}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${s.hands.length?`
+    <div class="sec-head" style="margin-top:20px;"><div class="section-title" style="font-size:18px;">🃏 Hands This Session</div><span style="font-size:12px;color:var(--brown-muted);">${s.hands.length}</span></div>
+    <div class="player-card">
+      ${s.hands.map(h=>{
+        const r=HAND_RANKS.find(x=>x.key===h.rank);
+        return `<div class="lb-row">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(244,179,0,0.10);border:1px solid rgba(244,179,0,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${r?.icon||'🃏'}</div>
+          <div class="lb-info"><div class="lb-name">${h.winner} — ${r?.name||h.rank}</div>${h.notable&&h.note?`<div style="font-size:12px;color:var(--fly-deep);margin-top:2px;">⭐ ${h.note}</div>`:''}</div>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+
+    <div class="sec-head" style="margin-top:20px;"><div class="section-title" style="font-size:18px;">💰 Settlements</div><span style="font-size:12px;color:var(--brown-muted);">${settlement.transactions.length} transactions</span></div>
+    ${settlement.transactions.length===0?`
+      <div class="player-card" style="text-align:center;padding:24px;border-color:rgba(46,125,50,0.2);">
+        <div style="font-size:32px;margin-bottom:10px;">🎉</div>
+        <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--win);">All Square!</div>
+        <div style="font-size:13px;color:var(--brown-muted);margin-top:6px;">No transfers needed</div>
+      </div>`:`
+      <div class="player-card" id="settle-list">
+        <div style="font-size:12px;color:var(--brown-muted);margin-bottom:14px;">Tap to mark each as paid.</div>
+        ${settlement.transactions.map((t,i)=>{
+          const ff=G.families.find(f=>f.id===t.fromFamilyId);
+          return `<div class="settle-row" id="str-${i}">
+            <div class="avatar avatar-sm" style="background:${hexRgba(ff?.color||'#888',0.18)};color:${ff?.color||'#888'};border-color:${ff?.color||'#888'};">${initials(t.from)}</div>
+            <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.from} → ${t.to}</div><div style="font-size:11px;color:var(--brown-muted);">Family settlement</div></div>
+            <div class="settle-amount">${fmtAbs(t.amount)}</div>
+            <button class="pay-btn" id="pay-${i}" onclick="markPaid(${i})">${t.paid?'✓ Paid':'Pay'}</button>
+          </div>`;
+        }).join('')}
+        <div id="all-settled-banner" style="display:none;text-align:center;padding:14px;color:var(--win);font-weight:700;">✓ All settled! 🎉</div>
+      </div>`}
+
+    <button class="btn btn-primary" onclick="saveSession()" style="margin-top:24px;">Save to League History ✓</button>
+    <a href="/hand-history.html" class="btn btn-outline" style="margin-top:10px;text-decoration:none;">📜 View Full Hand History</a>
+  `;
+}
+
+function toggleSumView(v) {
+  $('sum-family').style.display = v==='family'?'block':'none';
+  $('sum-individual').style.display = v==='individual'?'block':'none';
+  $('st-family').classList.toggle('active', v==='family');
+  $('st-individual').classList.toggle('active', v==='individual');
+}
+
+function markPaid(i) {
+  G.currentSession.settlement.transactions[i].paid = true;
+  const btn=$(`pay-${i}`);
+  if(btn){btn.textContent='✓ Paid';btn.classList.add('paid');}
+  if(G.currentSession.settlement.transactions.every(t=>t.paid)){
+    G.currentSession.settlement.allSettled=true;
+    $('all-settled-banner').style.display='block';
+    $('settle-list').style.opacity='0.7';
+    toast('All settled! 🎉');
+    confetti('#f4b300');
+  } else { toast('Payment marked ✓'); }
+}
+
+function saveSession() {
+  goTo('screen-dashboard');
+  switchDashTab('home');
+  toast('Session saved! 📚');
+}
+
+function endSession() {
+  closeModal('modal-end-confirm');
+  openChipCount(true);
+}
+
+// ── VIEW SESSION ──────────────────────────────────────────
+function viewSession(sid) {
+  const s = G.sessions.find(x=>x.id===sid);
+  if (!s) return;
+  const sorted=[...s.players].sort((a,b)=>b.netResult-a.netResult);
+  const settlement=s.settlement;
+
+  $('summary-content').innerHTML = `
+    <div style="background:var(--cream-2);border-radius:var(--r-xl);padding:20px;text-align:center;margin-bottom:20px;border:1.5px solid var(--cream-border2);">
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:4px;">Session #${s.number}</div>
+      <div style="font-size:13px;color:var(--brown-muted);">${s.venue} · ${formatDate(s.date)} · ${s.duration}min</div>
+      ${getWinner(s)?`<div class="badge badge-firefly" style="margin-top:10px;">🏆 ${getWinner(s)}</div>`:''}
+    </div>
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">Final Results</div></div>
+    <div class="player-card">
+      ${sorted.map((p,i)=>{
+        const fc=fColor(p.familyId);
+        const fam=G.families.find(f=>f.id===p.familyId);
+        return `<div class="lb-row">
+          <div style="font-size:16px;width:24px;">${['🥇','🥈','🥉'][i]||(i+1)}</div>
+          <div class="avatar avatar-sm" style="background:${hexRgba(fc,0.18)};color:${fc};border-color:${fc};">${initials(p.name)}</div>
+          <div class="lb-info"><div class="lb-name">${p.name}</div><div class="lb-sub">${fam?.name||''} · ${fmtAbs(p.invested)} in</div></div>
+          <span class="result-pill ${p.netResult>=0?'win':'loss'}">${fmtMoney(p.netResult)}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    ${s.hands?.length?`
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">🃏 Hand History</div></div>
+    <div class="player-card">
+      ${s.hands.map(h=>{
+        const r=HAND_RANKS.find(x=>x.key===h.rank);
+        return `<div class="lb-row">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(244,179,0,0.10);border:1px solid rgba(244,179,0,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${r?.icon||'🃏'}</div>
+          <div class="lb-info"><div class="lb-name">${h.winner} — ${r?.name||h.rank}</div>${h.notable&&h.note?`<div style="font-size:12px;color:var(--fly-deep);margin-top:2px;">⭐ ${h.note}</div>`:''}</div>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+    ${settlement?`
+    <div class="sec-head"><div class="section-title" style="font-size:18px;">💰 Settlement</div></div>
+    <div class="player-card">
+      ${settlement.transactions.map(t=>`
+        <div class="settle-row" style="padding:12px 0;">
+          <div style="flex:1;font-size:14px;font-weight:700;">${t.from} → ${t.to}</div>
+          <div class="mono" style="color:var(--fly-deep);">${fmtAbs(t.amount)}</div>
+          <span class="${t.paid?'badge badge-settled':'badge badge-pending'}">${t.paid?'Paid':'Pending'}</span>
+        </div>`).join('')}
+      ${settlement.transactions.length===0?`<div style="text-align:center;color:var(--win);padding:12px;font-weight:700;">✓ All Square</div>`:''}
+    </div>`:''}
+    <a href="/hand-history.html" class="btn btn-firefly" style="margin-top:20px;text-decoration:none;">📜 View in Hand History</a>
+  `;
+  goTo('screen-summary');
+}
+
+// ── HELPERS ──────────────────────────────────────────────
+function getFamilyStandings() {
+  return G.families.map(f=>({id:f.id,name:f.name,color:f.color,members:f.members,netResult:f.stats?.netResult||0,wins:f.stats?.wins||0,sessionsPlayed:f.stats?.sessionsPlayed||0})).sort((a,b)=>b.netResult-a.netResult);
+}
+
+function getWinner(s) {
+  if (!s.players.length) return null;
+  const sorted=[...s.players].sort((a,b)=>b.netResult-a.netResult);
+  return sorted[0]?.netResult>0?sorted[0].name:null;
+}
+
+function shareSession() {
+  if (navigator.share) navigator.share({title:'PokerSplit',text:'Check out our poker results!',url:window.location.href});
+  else toast('Share link copied! 📋');
+}
+
+function openRebuyModal() { populateLivePlayerSelects(); $('mr-amount').value=G.currentSession?.buyin||20; openModal('modal-rebuy'); }
+function openAddonModal()  { populateLivePlayerSelects(); $('ma-amount').value=G.currentSession?.buyin||20; openModal('modal-addon'); }
+
+// Override action bar onclick handlers to also populate selects
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderColorGrid();
+  // Patch modal openers for live session
+  document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')?.setAttribute('onclick',"populateLivePlayerSelects();$('mr-amount').value=G.currentSession?.buyin||20;openModal('modal-rebuy')");
+  document.querySelector('[onclick="openModal(\'modal-addon\')"]')?.setAttribute('onclick',"populateLivePlayerSelects();$('ma-amount').value=G.currentSession?.buyin||20;openModal('modal-addon')");
+});
+</script>
+</body>
+</html>
