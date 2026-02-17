@@ -12,10 +12,10 @@ test("Create league → dashboard active → localStorage saved", async ({ page 
   await waitActive(page, "#screen-setup");
 
   // Fill league fields (based on Claude spec name=)
-  await page.locator('input[name="leagueName"]').fill("Test League");
-  await page.locator('input[name="buyin"]').fill("20");
-  await page.locator('input[name="startingChips"]').fill("1000");
-  await page.locator('select[name="format"]').selectOption({ label: "Cash Game" });
+await page.fill('#lg-name', 'Test League');
+await page.fill('#lg-buyin', '20');
+await page.fill('#lg-chips', '1000');
+await page.selectOption('#lg-format', 'cash'); // or 'tournament'
 
   // Add Family 1
   await page.getByRole("button", { name: /add family/i }).click();
