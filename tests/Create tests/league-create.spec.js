@@ -1,5 +1,5 @@
 const { test, expect } = require("@playwright/test");
-const { resetStorage, waitActive } = require("./_helpers");
+const { resetStorage, waitActive } = require("../_helpers");
 
 test("Create league → dashboard active → localStorage saved", async ({ page }) => {
   await resetStorage(page);
