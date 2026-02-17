@@ -7,6 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f4b300">
 <meta name="description" content="PokerSplit — Track. Rebuy. Split. Settle Instantly. Private family poker leagues made simple.">
+<meta property="og:title" content="PokerSplit — Track. Rebuy. Split. Settle Instantly.">
+<meta property="og:description" content="Private family poker leagues made simple: chip tracking, rebuys, automatic settlements, and hand history.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.pokersplit.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PokerSplit — Track. Split. Settle.">
+<meta name="twitter:description" content="Run private poker nights with smart chip tracking and instant settlements.">
 <title>PokerSplit — Track. Rebuy. Split. Settle Instantly.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -259,6 +266,7 @@ select.field-input { cursor: pointer; }
    BUTTONS
 ══════════════════════════════════════════ */
 .btn {
+  touch-action: manipulation;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 700; transition: all 0.18s; user-select: none;
@@ -1021,6 +1029,64 @@ let G = {
   activeTab: 'home'
 };
 
+// ── PERSISTENCE (localStorage) ─────────────────────
+const STORAGE_KEY = 'pokersplit_state_v1';
+const LEGACY_KEYS = ['pokersplit_v1','pokersplit_league_v1','pokersplit_sessions_v1','pokersplit_hands_v1'];
+
+function snapshotState() {
+  // Avoid storing timers/DOM refs
+  return {
+    version: 1,
+    savedAt: Date.now(),
+    league: G.league,
+    families: G.families,
+    sessions: G.sessions,
+    currentSession: G.currentSession && {
+      ...G.currentSession,
+      // Timer interval is runtime-only
+      timerInterval: undefined
+    }
+  };
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshotState()));
+    // Soft-compat for older pages (if user has them cached)
+    localStorage.setItem('pokersplit_league_v1', JSON.stringify({league:G.league,families:G.families}));
+    localStorage.setItem('pokersplit_sessions_v1', JSON.stringify(G.sessions));
+  } catch (e) { /* ignore */ }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+
+    // Legacy migration paths
+    const legacy = localStorage.getItem('pokersplit_v1');
+    if (legacy) return JSON.parse(legacy);
+
+    const legLeague = localStorage.getItem('pokersplit_league_v1');
+    const legSessions = localStorage.getItem('pokersplit_sessions_v1');
+    if (legLeague || legSessions) {
+      const ll = legLeague ? JSON.parse(legLeague) : {};
+      const ss = legSessions ? JSON.parse(legSessions) : [];
+      return { version: 1, league: ll.league||null, families: ll.families||[], sessions: ss||[], currentSession: null };
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function hydrateState(st) {
+  if (!st) return;
+  G.league = st.league || null;
+  G.families = Array.isArray(st.families) ? st.families : [];
+  G.sessions = Array.isArray(st.sessions) ? st.sessions : [];
+  G.currentSession = st.currentSession || null;
+}
+
+
 // ── HELPERS ──────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const uid = () => Math.random().toString(36).slice(2,9);
@@ -1092,6 +1158,7 @@ function addFamily() {
   closeModal('modal-family');
   renderFamiliesList();
   toast(`${name} added 🏠`);
+  saveState();
 }
 
 function removeFam(id) {
@@ -1168,6 +1235,7 @@ function loadDemo() {
   goTo('screen-dashboard');
   switchDashTab('home');
   toast('Demo loaded! 🃏');
+  saveState();
 }
 
 // ── DASHBOARD TABS ──────────────────────────────────
@@ -1545,6 +1613,7 @@ function confirmRebuy(type) {
   closeModal(modalId);
   renderLiveSession();
   toast(`${type==='rebuy'?'Rebuy':'Add-on'} recorded for ${p?.name} 💰`);
+  saveState();
 }
 
 function populateLivePlayerSelects() {
@@ -1639,8 +1708,15 @@ function checkBalance(expected) {
   G.currentSession.players.forEach(p=>{entered+=parseInt($(`chip-${p.playerId}`)?.value||0);});
   const diff=entered-expected;
   const el=$('chips-balance');
-  if(Math.abs(diff)<5){el.textContent='✓ Balanced';el.style.color='var(--win)';}
+  const ok = Math.abs(diff) <= 5;
+  if(ok){el.textContent='✓ Balanced';el.style.color='var(--win)';}
   else{el.textContent=`${diff>0?'+':''}${Math.round(diff)} (${diff>0?'over':'under'})`;el.style.color='var(--loss)';}
+  const btn = $('btnCalcSettlement');
+  if(btn){
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? '1' : '.55';
+    btn.style.pointerEvents = ok ? 'auto' : 'none';
+  }
 }
 
 function confirmChipCount() {
@@ -1917,6 +1993,10 @@ function openAddonModal()  { populateLivePlayerSelects(); $('ma-amount').value=G
 
 // Override action bar onclick handlers to also populate selects
 document.addEventListener('DOMContentLoaded', ()=>{
+  const st = loadState();
+  hydrateState(st);
+  if(G.currentSession && G.currentSession.status==='active'){G.currentScreen='live';}
+  else if(G.league){G.currentScreen='dashboard';}
   renderColorGrid();
   // Patch modal openers for live session
   document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')?.setAttribute('onclick',"populateLivePlayerSelects();$('mr-amount').value=G.currentSession?.buyin||20;openModal('modal-rebuy')");

@@ -992,12 +992,46 @@ const PLAYER_COLORS = ['#8B1A1A','#1A2E5A','#3D1A5A','#7A3D1A','#1A3D5A','#3D4A1
 // ────────────────────────────────────────────────
 // STATE — persisted to localStorage
 // ────────────────────────────────────────────────
-const STORAGE_KEY = 'pokersplit_hands_v2';
+const STORAGE_KEY = 'pokersplit_state_v1';
+const LEGACY_HANDS_KEY = 'pokersplit_hands_v2';
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    // Preferred: unified app state
+    const rawUnified = localStorage.getItem(STORAGE_KEY);
+    if (rawUnified) {
+      const u = JSON.parse(rawUnified);
+      const league = u.league || null;
+      const sessions = Array.isArray(u.sessions) ? u.sessions : [];
+      const players = [];
+      if (league && Array.isArray(league.members)) {
+        league.members.forEach(m => { if(!players.includes(m.name)) players.push(m.name); });
+      }
+      const hands = [];
+      sessions.forEach(s => {
+        (s.hands||[]).forEach(h => {
+          hands.push({
+            id: h.id || ('h_'+Math.random().toString(36).slice(2)),
+            sessionId: s.id,
+            rank: h.rank,
+            note: h.note || '',
+            winner: h.winnerName || '',
+            winners: h.winners || [],
+            pot: h.pot,
+            createdAt: h.createdAt || s.endedAt || s.startedAt || Date.now()
+          });
+        });
+      });
+      return {
+        sessions: sessions.map(s => ({ id:s.id, name:s.name || 'Session', date: (s.startedAt? new Date(s.startedAt).toISOString().slice(0,10):'') })),
+        players: players.length ? players : (u.families||[]).flatMap(f=>f.members||[]).map(m=>m.name),
+        hands: hands
+      };
+    }
+
+    // Legacy hands-only storage (older page)
+    const rawLegacy = localStorage.getItem(LEGACY_HANDS_KEY);
+    if (rawLegacy) return JSON.parse(rawLegacy);
   } catch(e) {}
   return getDefaultState();
 }

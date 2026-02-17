@@ -190,7 +190,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <script>
 // ── SHARED STATE (reads from pokersplit shared localStorage) ──────────────
-const STORAGE_KEY = 'pokersplit_league_v1';
+const STORAGE_KEY = 'pokersplit_state_v1';
+const LEGACY_KEY = 'pokersplit_league_v1';
 
 function loadLeague() {
   try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch(e) {}

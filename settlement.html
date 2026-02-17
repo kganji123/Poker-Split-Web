@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f4b300">
+<title>PokerSplit — Settlements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--fly:#f4b300;--fly-deep:#b38200;--cream-card:#FFFDF8;--cream:#FAF0DC;--cream-2:#F5E8C8;--cream-border:rgba(200,145,0,0.15);--cream-border2:rgba(200,145,0,0.25);--brown:#2C1810;--brown-mid:#5C3420;--brown-muted:#8B6040;--brown-faint:#BFA080;--win:#2E7D32;--win-bg:rgba(46,125,50,0.10);--loss:#C62828;--pending:#E65100;--safe-top:env(safe-area-inset-top,44px);--safe-bottom:env(safe-area-inset-bottom,20px);}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--fly);color:var(--brown);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(255,220,80,0.35) 0%,transparent 55%);pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;max-width:440px;margin:0 auto;min-height:100vh;}
+.site-header{padding:calc(var(--safe-top) + 12px) 20px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:80;background:rgba(249,197,46,0.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(180,120,0,0.15);}
+.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--brown);text-decoration:none;display:flex;align-items:center;gap:10px;}
+.logo-badge{width:38px;height:38px;border-radius:12px;background:var(--brown);color:#fdd96a;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.logo span{color:var(--fly-deep);}
+.nav-link{font-size:12px;font-weight:700;color:var(--brown-mid);text-decoration:none;padding:7px 12px;border-radius:8px;transition:all 0.2s;border:1px solid transparent;}
+.nav-link.active{background:rgba(44,24,16,0.10);border-color:rgba(44,24,16,0.12);color:var(--brown);}
+.hero{padding:32px 20px 20px;}
+.hero-title{font-family:'Fraunces',serif;font-size:40px;font-weight:900;line-height:1;color:var(--brown);}
+.hero-title em{color:var(--fly-deep);font-style:italic;}
+.hero-sub{font-size:13px;color:var(--brown-mid);margin-top:8px;}
+.main-card{background:var(--cream-card);border-radius:28px 28px 0 0;border:1px solid var(--cream-border2);padding:24px 20px;box-shadow:0 -8px 32px rgba(140,80,20,0.12);min-height:calc(100vh - 260px);}
+.page-body{padding-bottom:calc(90px + var(--safe-bottom));}
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-icon{font-size:48px;margin-bottom:14px;display:block;opacity:0.4;}
+.empty-title{font-family:'Fraunces',serif;font-size:22px;color:var(--brown);margin-bottom:8px;}
+.empty-sub{font-size:14px;color:var(--brown-muted);line-height:1.6;}
+.settle-card{background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:16px;padding:16px;margin-bottom:12px;}
+.settle-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--cream-border);}
+.settle-row:last-child{border-bottom:none;}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;width:36px;height:36px;font-size:12px;}
+.settle-names{font-size:14px;font-weight:700;color:var(--brown);}
+.settle-amount{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--fly-deep);margin-left:auto;}
+.pay-btn{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid rgba(244,179,0,0.35);color:var(--fly-deep);background:rgba(244,179,0,0.10);}
+.pay-btn.paid{background:var(--win-bg);color:var(--win);}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--brown);color:#feeab0;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.3s;}
+#toast.show{opacity:1;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:rgba(250,240,220,0.96);backdrop-filter:blur(20px);border-top:1.5px solid var(--cream-border2);display:flex;justify-content:space-around;padding:10px 4px calc(var(--safe-bottom) + 8px);z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;}
+.nav-icon{font-size:22px;}
+.nav-label{font-size:10px;color:var(--brown-faint);font-weight:700;text-transform:uppercase;}
+.nav-item.active .nav-label{color:var(--fly-deep);}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="site-header">
+<a href="index.html" class="logo"><div class="logo-badge">🂡</div>Poker<span>Split</span></a>
+<nav style="display:flex;gap:4px;">
+<a href="index.html" class="nav-link">Game</a>
+<a href="settlement.html" class="nav-link active">Settle</a>
+</nav>
+</header>
+<div class="hero">
+<h1 class="hero-title">Who owes<br><em>who?</em></h1>
+<p class="hero-sub">Track balances and mark payments.</p>
+</div>
+<div class="main-card page-body" id="content"></div>
+</div>
+<div class="bottom-nav">
+<a href="index.html" class="nav-item"><span class="nav-icon">🎮</span><span class="nav-label">Game</span></a>
+<a href="poker-hands.html" class="nav-item"><span class="nav-icon">📖</span><span class="nav-label">Hands</span></a>
+<a href="hand-history.html" class="nav-item"><span class="nav-icon">📜</span><span class="nav-label">History</span></a>
+<a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span><span class="nav-label">Board</span></a>
+<a href="settlement.html" class="nav-item active"><span class="nav-icon">💰</span><span class="nav-label">Settle</span></a>
+</div>
+<div id="toast"></div>
+<script>
+const STORAGE='pokersplit_v1';
+function load(){try{const r=localStorage.getItem(STORAGE);if(r)return JSON.parse(r);}catch(e){}return{sessions:[{id:'s1',number:1,settlement:{transactions:[{from:'Garcias',to:'Martins',amount:24,paid:false}]}},{id:'s2',number:2,settlement:{transactions:[{from:'Patels',to:'Johnsons',amount:10,paid:true}]}}]};}
+let D=load();
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify(D));}catch(e){}}
+function init(n)=>n.split(' ').map(w=>w[0]).join('').slice(0,2);
+function render(){const c=document.getElementById('content');const pending=D.sessions.flatMap(s=>s.settlement?.transactions.filter(t=>!t.paid)||[]);if(!pending.length){c.innerHTML='<div class="empty-state"><span class="empty-icon">🎉</span><div class="empty-title">All square!</div><div class="empty-sub">No outstanding balances.</div></div>';return;}
+c.innerHTML=`<div class="settle-card">${pending.map((t,i)=>`<div class="settle-row"><div class="avatar" style="background:rgba(100,50,20,0.2);color:#654321;">${init(t.from)}</div><div style="flex:1;"><div class="settle-names">${t.from} → ${t.to}</div></div><div class="settle-amount">$${t.amount}</div><button class="pay-btn ${t.paid?'paid':''}" onclick="markPaid(${i})">${t.paid?'✓ Paid':'Pay'}</button></div>`).join('')}</div>`;}
+function markPaid(i){const pending=D.sessions.flatMap(s=>s.settlement?.transactions.filter(t=>!t.paid)||[]);if(pending[i]){pending[i].paid=true;save();showToast('✓ Marked paid');render();}}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+render();
+</script>
+</body>
+</html>
