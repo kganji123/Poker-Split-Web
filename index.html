@@ -20,7 +20,7 @@
 <title>PokerSplit — Track. Rebuy. Split. Settle Instantly.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 /* ══════════════════════════════════════════
    DESIGN TOKENS — Golden Yellow + Cream
@@ -570,7 +570,7 @@ select.field-input { cursor: pointer; }
   padding: 12px 16px calc(var(--safe-bottom) + 12px);
   z-index: 100;
 }
-.action-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.action-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
 .action-btn {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; height: 58px; border-radius: var(--r-md);
@@ -623,10 +623,35 @@ select.field-input { cursor: pointer; }
 /* ══════════════════════════════════════════
    FAMILY COLOR CHIPS
 ══════════════════════════════════════════ */
-.color-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+.color-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 8px; }
 .color-swatch { height: 44px; border-radius: var(--r-sm); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
 .color-swatch.selected { border-color: var(--brown); transform: scale(0.93); }
 </style>
+
+<!-- ══════════════════════════════════════════════════
+     SUPABASE CONFIGURATION
+══════════════════════════════════════════════════ -->
+<!-- Load Supabase config first -->
+<script src="public/supabase-config.js"></script>
+
+<!-- Initialize Supabase client -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  
+  // Create Supabase client and make it globally available
+  window.supabaseClient = createClient(
+    window.__SUPABASE_URL__,
+    window.__SUPABASE_ANON_KEY__
+  );
+  
+  // Mark as ready
+  window.supabaseReady = true;
+  console.log('✅ Supabase client initialized');
+  
+  // Dispatch event for code that needs to wait for Supabase
+  window.dispatchEvent(new Event('supabase-ready'));
+</script>
+
 </head>
 
 <body>
@@ -638,18 +663,10 @@ select.field-input { cursor: pointer; }
     <div class="logo-badge">🂡</div>
     Poker<span>Split</span>
   </a>
-
-  <div style="display:flex; align-items:center; gap:10px;">
-    <nav class="header-nav">
-      <a href="/hand-history.html" class="nav-link">History</a>
-      <a href="/poker-hands.html"  class="nav-link">Hands</a>
-    </nav>
-
-    <div id="auth-box" style="display:none; align-items:center; gap:10px;">
-      <span id="auth-email" style="font-size:12px; color:var(--brown-mid); font-weight:700;"></span>
-      <button class="btn btn-outline btn-sm" onclick="signOut()">Sign out</button>
-    </div>
-  </div>
+  <nav class="header-nav">
+    <a href="/hand-history.html" class="nav-link">History</a>
+    <a href="/poker-hands.html"  class="nav-link">Hands</a>
+  </nav>
 </header>
 
 <!-- ══════════════════════════════════════════════════
@@ -674,18 +691,22 @@ select.field-input { cursor: pointer; }
   <div class="main-card page-body">
     <div class="section-title">Get Started</div>
     <div class="section-sub">Create a league or load a demo to explore.</div>
-     
-    <button class="btn btn-firefly" id="btn-google" onclick="signInWithGoogle()" style="margin-top:12px;">
-    Continue with Google
+
+    <!-- Google Sign In (optional, for cloud sync) -->
+    <button class="btn btn-primary" onclick="signInWithGoogle()" style="margin-bottom:12px; background: var(--fly); color: var(--brown);">
+      🔐 Continue with Google
     </button>
-     
-    <button class="btn btn-primary" onclick="goTo('screen-setup')" style="margin-bottom:12px;">
+    
+    <div style="text-align: center; margin: 12px 0; font-size: 12px; color: var(--brown-muted);">
+      or create locally
+    </div>
+
+    <button class="btn btn-outline" onclick="goTo('screen-setup')" style="margin-bottom:12px;">
       ♠ Create Your League →
     </button>
     <button class="btn btn-outline" onclick="loadDemo()">
       View Demo League
     </button>
-    
 
     <div class="divider" style="margin:28px 0 20px;"></div>
 
@@ -862,8 +883,9 @@ select.field-input { cursor: pointer; }
   </div>
   <div class="action-bar">
     <div class="action-grid">
-      <div class="action-btn" onclick="openRebuyModal()"><span>↩</span>Rebuy</div>
-            <div class="action-btn primary-action" onclick="openHandRecorder()"><span>🃏</span>Hand</div>
+      <div class="action-btn" onclick="openModal('modal-rebuy')"><span>↩</span>Rebuy</div>
+      <div class="action-btn" onclick="openModal('modal-addon')"><span>➕</span>Add-on</div>
+      <div class="action-btn primary-action" onclick="openHandRecorder()"><span>🃏</span>Hand</div>
       <div class="action-btn" onclick="openChipCount(false)"><span>🔢</span>Count</div>
     </div>
   </div>
@@ -924,8 +946,28 @@ select.field-input { cursor: pointer; }
         <input class="field-input amount-input" id="mr-amount" type="number" value="20">
       </div>
     </div>
-    <button class="btn btn-primary" onclick="confirmRebuy()" style="margin-bottom:10px;">Confirm Rebuy</button>
+    <button class="btn btn-primary" onclick="confirmRebuy('rebuy')" style="margin-bottom:10px;">Confirm Rebuy</button>
     <button class="btn btn-outline" onclick="closeModal('modal-rebuy')">Cancel</button>
+  </div>
+</div>
+
+<!-- Add-on -->
+<div class="modal-overlay" id="modal-addon">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Record Add-on</div>
+    <div class="field-group">
+      <label class="field-label">Player</label>
+      <select class="field-input" id="ma-player"></select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Amount</label>
+      <div class="amount-wrap"><span class="amount-prefix">$</span>
+        <input class="field-input amount-input" id="ma-amount" type="number" value="20">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="confirmRebuy('addon')" style="margin-bottom:10px;">Confirm Add-on</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-addon')">Cancel</button>
   </div>
 </div>
 
@@ -998,16 +1040,195 @@ select.field-input { cursor: pointer; }
      JAVASCRIPT
 ═══════════════════════════════════════════════════ -->
 <script>
-// ── CONSTANTS ──────────────────────────────────────
-const SUPABASE_URL = window.__SUPABASE_URL__;
-const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY__;
+// ══════════════════════════════════════════════════════════════════
+// SUPABASE AUTH & USER STATE
+// ══════════════════════════════════════════════════════════════════
+let currentUser = null;
+let supabaseReady = false;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error("Missing Supabase config. Ensure public/supabase-config.js is loaded and defines window.__SUPABASE_URL__ and window.__SUPABASE_ANON_KEY__.");
-  // fail fast so we don’t throw confusing errors later
+// ── GOOGLE SIGN IN ──────────────────────────────────────
+async function signInWithGoogle() {
+  if (!window.supabaseClient) {
+    showToast('⏳ Loading authentication...');
+    // Wait for Supabase to initialize
+    await new Promise(resolve => {
+      if (window.supabaseReady) resolve();
+      else window.addEventListener('supabase-ready', resolve, { once: true });
+    });
+  }
+  
+  try {
+    showToast('Signing in with Google...');
+    const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    
+    if (error) throw error;
+    
+  } catch (error) {
+    console.error('Sign in error:', error);
+    showToast('❌ Sign in failed: ' + error.message);
+  }
 }
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-   
+
+// ── SIGN OUT ────────────────────────────────────────────
+async function signOut() {
+  if (!window.supabaseClient) return;
+  
+  try {
+    showToast('Signing out...');
+    const { error } = await window.supabaseClient.auth.signOut();
+    if (error) throw error;
+    
+    currentUser = null;
+    showToast('✅ Signed out');
+    updateAuthUI();
+    
+  } catch (error) {
+    console.error('Sign out error:', error);
+    showToast('❌ Sign out failed');
+  }
+}
+
+// ── UPDATE AUTH UI ──────────────────────────────────────
+function updateAuthUI() {
+  // Find or create auth button in header
+  let authBtn = document.getElementById('auth-btn');
+  
+  if (!authBtn) {
+    authBtn = document.createElement('button');
+    authBtn.id = 'auth-btn';
+    authBtn.className = 'btn-outline';
+    authBtn.style.cssText = 'font-size: 11px; padding: 6px 12px; margin-left: 8px;';
+    
+    // Insert into header nav
+    const headerNav = document.querySelector('.header-nav');
+    if (headerNav) {
+      headerNav.appendChild(authBtn);
+    }
+  }
+  
+  if (currentUser) {
+    // Show user info
+    const displayName = currentUser.user_metadata?.full_name || 
+                        currentUser.email?.split('@')[0] || 
+                        'User';
+    authBtn.innerHTML = `👤 ${displayName.substring(0, 12)}`;
+    authBtn.onclick = () => {
+      if (confirm(`Sign out from ${displayName}?`)) signOut();
+    };
+    authBtn.title = currentUser.email;
+  } else {
+    // Show sign in
+    authBtn.innerHTML = '🔐 Sign In';
+    authBtn.onclick = signInWithGoogle;
+    authBtn.title = 'Sign in with Google';
+  }
+}
+
+// ── INITIALIZE AUTH STATE ───────────────────────────────
+async function initializeAuth() {
+  if (!window.supabaseClient) {
+    console.log('⏳ Waiting for Supabase...');
+    await new Promise(resolve => {
+      if (window.supabaseReady) resolve();
+      else window.addEventListener('supabase-ready', resolve, { once: true });
+    });
+  }
+  
+  try {
+    // Get current session
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    
+    if (session?.user) {
+      currentUser = session.user;
+      console.log('✅ User authenticated:', currentUser.email);
+      await loadFromSupabase();
+    }
+    
+    // Listen for auth state changes
+    window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth event:', event);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        currentUser = session.user;
+        showToast(`👋 Welcome, ${currentUser.user_metadata?.full_name || 'there'}!`);
+        await loadFromSupabase();
+        updateAuthUI();
+        
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        updateAuthUI();
+      }
+    });
+    
+    supabaseReady = true;
+    updateAuthUI();
+    
+  } catch (error) {
+    console.error('❌ Auth initialization error:', error);
+  }
+}
+
+// ── SUPABASE PERSISTENCE ────────────────────────────────
+async function saveToSupabase() {
+  if (!currentUser || !window.supabaseClient) return;
+  
+  try {
+    const data = {
+      user_id: currentUser.id,
+      league: G.league,
+      families: G.families,
+      sessions: G.sessions,
+      updated_at: new Date().toISOString()
+    };
+    
+    const { error } = await window.supabaseClient
+      .from('poker_leagues')
+      .upsert(data, { onConflict: 'user_id' });
+    
+    if (error) throw error;
+    console.log('☁️ Saved to Supabase');
+    
+  } catch (error) {
+    console.error('❌ Supabase save error:', error);
+  }
+}
+
+async function loadFromSupabase() {
+  if (!currentUser || !window.supabaseClient) return;
+  
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('poker_leagues')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error; // Ignore "no rows" error
+    
+    if (data) {
+      G.league = data.league;
+      G.families = data.families || [];
+      G.sessions = data.sessions || [];
+      console.log('☁️ Loaded from Supabase');
+      
+      // Update UI
+      if (G.league) {
+        goTo('screen-dashboard');
+        switchDashTab('home');
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Supabase load error:', error);
+  }
+}
+
+// ── CONSTANTS ──────────────────────────────────────
 const HAND_RANKS = [
   {key:'royal_flush',    icon:'👑', name:'Royal Flush',     rare:true },
   {key:'straight_flush', icon:'🌟', name:'Straight Flush',  rare:true },
@@ -1039,21 +1260,6 @@ let G = {
 const STORAGE_KEY = 'pokersplit_state_v1';
 const LEGACY_KEYS = ['pokersplit_v1','pokersplit_league_v1','pokersplit_sessions_v1','pokersplit_hands_v1'];
 
-async function signInWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin // works for GitHub Pages/custom domain
-    }
-  });
-  if (error) toast("Google sign-in failed");
-}
-
-async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  if (error) toast("Sign out failed");
-}
-   
 function snapshotState() {
   // Avoid storing timers/DOM refs
   return {
@@ -1072,10 +1278,16 @@ function snapshotState() {
 
 function saveState() {
   try {
+    // ✅ Save to localStorage (instant, offline-first)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshotState()));
-    // Soft-compat for older pages (if user has them cached)
+    // Soft-compat for older pages
     localStorage.setItem('pokersplit_league_v1', JSON.stringify({league:G.league,families:G.families}));
     localStorage.setItem('pokersplit_sessions_v1', JSON.stringify(G.sessions));
+    
+    // ✅ Also save to Supabase (cloud backup, if authenticated)
+    if (currentUser && window.supabaseClient) {
+      saveToSupabase().catch(err => console.warn('Supabase save failed:', err));
+    }
   } catch (e) { /* ignore */ }
 }
 
@@ -1637,21 +1849,23 @@ function renderLiveSession() {
 }
 
 // ── REBUY / ADDON ──────────────────────────────────────
-function confirmRebuy() {
-  const playerId = $('mr-player').value;
-  const amount = parseFloat($('mr-amount').value) || 0;
+function confirmRebuy(type) {
+  const modalId = type==='rebuy'?'modal-rebuy':'modal-addon';
+  const playerId = $(type==='rebuy'?'mr-player':'ma-player').value;
+  const amount = parseFloat($(type==='rebuy'?'mr-amount':'ma-amount').value)||0;
   if (!amount) { toast('Enter valid amount'); return; }
-  const p = G.currentSession.players.find(x => x.playerId === playerId);
-  if (p) { p.invested += amount; p.rebuys++; }
-  closeModal('modal-rebuy');
+  const p = G.currentSession.players.find(x=>x.playerId===playerId);
+  if (p) { p.invested+=amount; p.rebuys++; }
+  closeModal(modalId);
   renderLiveSession();
-  toast(`Rebuy recorded for ${p?.name} 💰`);
+  toast(`${type==='rebuy'?'Rebuy':'Add-on'} recorded for ${p?.name} 💰`);
   saveState();
 }
 
 function populateLivePlayerSelects() {
   const opts = G.currentSession.players.map(p=>`<option value="${p.playerId}">${p.name}</option>`).join('');
   $('mr-player').innerHTML = opts;
+  $('ma-player').innerHTML = opts;
   $('mh-winner').innerHTML = opts;
 }
 
@@ -2043,9 +2257,13 @@ function shareSession() {
 }
 
 function openRebuyModal() { populateLivePlayerSelects(); $('mr-amount').value=G.currentSession?.buyin||20; openModal('modal-rebuy'); }
+function openAddonModal()  { populateLivePlayerSelects(); $('ma-amount').value=G.currentSession?.buyin||20; openModal('modal-addon'); }
 
 // Override action bar onclick handlers to also populate selects
 document.addEventListener('DOMContentLoaded', () => {
+  // ✅ Initialize Supabase auth first
+  initializeAuth();
+  
   const st = loadState();
   hydrateState(st);
 
@@ -2064,31 +2282,12 @@ document.addEventListener('DOMContentLoaded', () => {
     goTo('screen-welcome');
   }
 
-  supabase.auth.onAuthStateChange(async (_event, session) => {
-  const user = session?.user || null;
-
-  const authBox = document.getElementById("auth-box");
-  const authEmail = document.getElementById("auth-email");
-  const btnGoogle = document.getElementById("btn-google");
-
-  if (user) {
-    if (authBox) authBox.style.display = "flex";
-    if (authEmail) authEmail.textContent = user.email || "Signed in";
-    if (btnGoogle) btnGoogle.style.display = "none";
-
-    G.user = { id: user.id, email: user.email };
-    // (D step will load data from Supabase here)
-  } else {
-    if (authBox) authBox.style.display = "none";
-    if (btnGoogle) btnGoogle.style.display = "flex";
-    G.user = null;
-  }
-});
-
   // ✅ Make rebuy/addon buttons populate selects before open
   document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')
     ?.setAttribute('onclick', "populateLivePlayerSelects(); $('mr-amount').value = G.currentSession?.buyin || 20; openModal('modal-rebuy')");
 
+  document.querySelector('[onclick="openModal(\'modal-addon\')"]')
+    ?.setAttribute('onclick', "populateLivePlayerSelects(); $('ma-amount').value = G.currentSession?.buyin || 20; openModal('modal-addon')");
 });
 </script>
 </body>
