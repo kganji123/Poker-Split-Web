@@ -41,7 +41,7 @@ test.describe('PokerSplit - Create League Flow', () => {
     await expect(page.locator('#dash-sub')).toContainText('2 families');
 
     // Families tab should list new families
-    await page.getByText('Families', { exact: true }).click();
+await page.locator('#dtab-families').click();
     await expect(page.locator('#dash-content')).toContainText('The Smiths');
     await expect(page.locator('#dash-content')).toContainText('The Patels');
   });
