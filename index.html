@@ -634,9 +634,10 @@ select.field-input { cursor: pointer; }
 <!-- Load Supabase config first -->
 <script src="public/supabase-config.js"></script>
 
-<!-- Initialize Supabase client -->
+<!-- Initialize Supabase client from official CDN -->
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  // Import from official Supabase CDN (esm.sh)
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   
   // Create Supabase client and make it globally available
   window.supabaseClient = createClient(
