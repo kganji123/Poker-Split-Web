@@ -1167,8 +1167,9 @@ function addFamily() {
 }
 
 function removeFam(id) {
-  G.families = G.families.filter(f=>f.id!==id);
+  G.families = G.families.filter(f => f.id !== id);
   renderFamiliesList();
+  saveState();
 }
 
 function renderFamiliesList() {
@@ -1195,11 +1196,22 @@ function createLeague() {
   const name = $('lg-name').value.trim();
   if (!name) { toast('Enter a league name'); return; }
   if (G.families.length < 2) { toast('Add at least 2 families'); return; }
-  G.league = { id:uid(), name, buyin:parseFloat($('lg-buyin').value)||20, startingChips:parseInt($('lg-chips').value)||1000, format:$('lg-format').value };
+
+  G.league = {
+    id: uid(),
+    name,
+    buyin: parseFloat($('lg-buyin').value) || 20,
+    startingChips: parseInt($('lg-chips').value) || 1000,
+    format: $('lg-format').value
+  };
+
   goTo('screen-dashboard');
   switchDashTab('home');
   toast(`${name} created! 🎉`);
   confetti();
+
+  // ✅ persist
+  saveState();
 }
 
 // ── DEMO ──────────────────────────────────────────
@@ -1572,6 +1584,7 @@ function startSession() {
   renderLiveSession();
   goTo('screen-live');
   startTimer();
+   saveState();
 }
 
 function startTimer() {
@@ -1673,6 +1686,7 @@ function confirmHand() {
   const msg = G.selectedHandRank==='royal_flush'?'👑 ROYAL FLUSH!! LEGENDARY!':G.selectedHandRank==='straight_flush'?'🌟 Straight Flush!':G.selectedHandRank==='four_of_a_kind'?'🔮 Four of a Kind!':r?.name+' for '+winner?.name;
   toast(msg, r?.rare?4000:2500);
   if(r?.rare){confetti('#D4E800');setTimeout(()=>confetti('#F5F99A'),400);}
+   saveState();
 }
 
 // ── CHIP COUNT ──────────────────────────────────────────
@@ -1709,15 +1723,26 @@ function adjustChips(pid, delta) {
 }
 
 function checkBalance(expected) {
-  let entered=0;
-  G.currentSession.players.forEach(p=>{entered+=parseInt($(`chip-${p.playerId}`)?.value||0);});
-  const diff=entered-expected;
-  const el=$('chips-balance');
+  let entered = 0;
+  G.currentSession.players.forEach(p => {
+    entered += parseInt($(`chip-${p.playerId}`)?.value || 0);
+  });
+
+  const diff = entered - expected;
+  const el = $('chips-balance');
   const ok = Math.abs(diff) <= 5;
-  if(ok){el.textContent='✓ Balanced';el.style.color='var(--win)';}
-  else{el.textContent=`${diff>0?'+':''}${Math.round(diff)} (${diff>0?'over':'under'})`;el.style.color='var(--loss)';}
-  const btn = $('btnCalcSettlement');
-  if(btn){
+
+  if (ok) {
+    el.textContent = '✓ Balanced';
+    el.style.color = 'var(--win)';
+  } else {
+    el.textContent = `${diff > 0 ? '+' : ''}${Math.round(diff)} (${diff > 0 ? 'over' : 'under'})`;
+    el.style.color = 'var(--loss)';
+  }
+
+  // ✅ Correct button id
+  const btn = $('chips-confirm-btn');
+  if (btn) {
     btn.disabled = !ok;
     btn.style.opacity = ok ? '1' : '.55';
     btn.style.pointerEvents = ok ? 'auto' : 'none';
@@ -1911,6 +1936,7 @@ function markPaid(i) {
     toast('All settled! 🎉');
     confetti('#f4b300');
   } else { toast('Payment marked ✓'); }
+   saveState();
 }
 
 function saveSession() {
@@ -1997,15 +2023,31 @@ function openRebuyModal() { populateLivePlayerSelects(); $('mr-amount').value=G.
 function openAddonModal()  { populateLivePlayerSelects(); $('ma-amount').value=G.currentSession?.buyin||20; openModal('modal-addon'); }
 
 // Override action bar onclick handlers to also populate selects
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', () => {
   const st = loadState();
   hydrateState(st);
-  if(G.currentSession && G.currentSession.status==='active'){G.currentScreen='live';}
-  else if(G.league){G.currentScreen='dashboard';}
+
   renderColorGrid();
-  // Patch modal openers for live session
-  document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')?.setAttribute('onclick',"populateLivePlayerSelects();$('mr-amount').value=G.currentSession?.buyin||20;openModal('modal-rebuy')");
-  document.querySelector('[onclick="openModal(\'modal-addon\')"]')?.setAttribute('onclick',"populateLivePlayerSelects();$('ma-amount').value=G.currentSession?.buyin||20;openModal('modal-addon')");
+
+  // ✅ Restore screen after refresh
+  if (G.currentSession && G.currentSession.status === 'active') {
+    goTo('screen-live');
+    renderLiveSession();
+    startTimer();
+    populateLivePlayerSelects();
+  } else if (G.league) {
+    goTo('screen-dashboard');
+    switchDashTab('home');
+  } else {
+    goTo('screen-welcome');
+  }
+
+  // ✅ Make rebuy/addon buttons populate selects before open
+  document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')
+    ?.setAttribute('onclick', "populateLivePlayerSelects(); $('mr-amount').value = G.currentSession?.buyin || 20; openModal('modal-rebuy')");
+
+  document.querySelector('[onclick="openModal(\'modal-addon\')"]')
+    ?.setAttribute('onclick', "populateLivePlayerSelects(); $('ma-amount').value = G.currentSession?.buyin || 20; openModal('modal-addon')");
 });
 </script>
 </body>
