@@ -570,7 +570,7 @@ select.field-input { cursor: pointer; }
   padding: 12px 16px calc(var(--safe-bottom) + 12px);
   z-index: 100;
 }
-.action-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.action-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
 .action-btn {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px; height: 58px; border-radius: var(--r-md);
@@ -623,7 +623,7 @@ select.field-input { cursor: pointer; }
 /* ══════════════════════════════════════════
    FAMILY COLOR CHIPS
 ══════════════════════════════════════════ */
-.color-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 8px; }
+.color-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
 .color-swatch { height: 44px; border-radius: var(--r-sm); cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
 .color-swatch.selected { border-color: var(--brown); transform: scale(0.93); }
 </style>
@@ -849,9 +849,8 @@ select.field-input { cursor: pointer; }
   </div>
   <div class="action-bar">
     <div class="action-grid">
-      <div class="action-btn" onclick="openModal('modal-rebuy')"><span>↩</span>Rebuy</div>
-      <div class="action-btn" onclick="openModal('modal-addon')"><span>➕</span>Add-on</div>
-      <div class="action-btn primary-action" onclick="openHandRecorder()"><span>🃏</span>Hand</div>
+      <div class="action-btn" onclick="openRebuyModal()"><span>↩</span>Rebuy</div>
+            <div class="action-btn primary-action" onclick="openHandRecorder()"><span>🃏</span>Hand</div>
       <div class="action-btn" onclick="openChipCount(false)"><span>🔢</span>Count</div>
     </div>
   </div>
@@ -912,28 +911,8 @@ select.field-input { cursor: pointer; }
         <input class="field-input amount-input" id="mr-amount" type="number" value="20">
       </div>
     </div>
-    <button class="btn btn-primary" onclick="confirmRebuy('rebuy')" style="margin-bottom:10px;">Confirm Rebuy</button>
+    <button class="btn btn-primary" onclick="confirmRebuy()" style="margin-bottom:10px;">Confirm Rebuy</button>
     <button class="btn btn-outline" onclick="closeModal('modal-rebuy')">Cancel</button>
-  </div>
-</div>
-
-<!-- Add-on -->
-<div class="modal-overlay" id="modal-addon">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Record Add-on</div>
-    <div class="field-group">
-      <label class="field-label">Player</label>
-      <select class="field-input" id="ma-player"></select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Amount</label>
-      <div class="amount-wrap"><span class="amount-prefix">$</span>
-        <input class="field-input amount-input" id="ma-amount" type="number" value="20">
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="confirmRebuy('addon')" style="margin-bottom:10px;">Confirm Add-on</button>
-    <button class="btn btn-outline" onclick="closeModal('modal-addon')">Cancel</button>
   </div>
 </div>
 
@@ -1621,23 +1600,21 @@ function renderLiveSession() {
 }
 
 // ── REBUY / ADDON ──────────────────────────────────────
-function confirmRebuy(type) {
-  const modalId = type==='rebuy'?'modal-rebuy':'modal-addon';
-  const playerId = $(type==='rebuy'?'mr-player':'ma-player').value;
-  const amount = parseFloat($(type==='rebuy'?'mr-amount':'ma-amount').value)||0;
+function confirmRebuy() {
+  const playerId = $('mr-player').value;
+  const amount = parseFloat($('mr-amount').value) || 0;
   if (!amount) { toast('Enter valid amount'); return; }
-  const p = G.currentSession.players.find(x=>x.playerId===playerId);
-  if (p) { p.invested+=amount; p.rebuys++; }
-  closeModal(modalId);
+  const p = G.currentSession.players.find(x => x.playerId === playerId);
+  if (p) { p.invested += amount; p.rebuys++; }
+  closeModal('modal-rebuy');
   renderLiveSession();
-  toast(`${type==='rebuy'?'Rebuy':'Add-on'} recorded for ${p?.name} 💰`);
+  toast(`Rebuy recorded for ${p?.name} 💰`);
   saveState();
 }
 
 function populateLivePlayerSelects() {
   const opts = G.currentSession.players.map(p=>`<option value="${p.playerId}">${p.name}</option>`).join('');
   $('mr-player').innerHTML = opts;
-  $('ma-player').innerHTML = opts;
   $('mh-winner').innerHTML = opts;
 }
 
@@ -1767,6 +1744,7 @@ function confirmChipCount() {
   renderSummaryScreen();
   goTo('screen-summary');
   setTimeout(confetti,500);
+  saveState(); // ✅ CRITICAL: Persist completed session to localStorage
 }
 
 // ── SETTLEMENT ──────────────────────────────────────────
@@ -1940,6 +1918,8 @@ function markPaid(i) {
 }
 
 function saveSession() {
+  G.currentSession = null; // ✅ Clear current session to avoid accidental re-entry
+  saveState(); // ✅ Persist the cleared state
   goTo('screen-dashboard');
   switchDashTab('home');
   toast('Session saved! 📚');
@@ -2015,12 +1995,17 @@ function getWinner(s) {
 }
 
 function shareSession() {
-  if (navigator.share) navigator.share({title:'PokerSplit',text:'Check out our poker results!',url:window.location.href});
-  else toast('Share link copied! 📋');
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title:'PokerSplit', text:'Check out our poker results!', url });
+  } else {
+    // ✅ Actually copy to clipboard instead of fake toast
+    navigator.clipboard?.writeText(url);
+    toast('Share link copied! 📋');
+  }
 }
 
 function openRebuyModal() { populateLivePlayerSelects(); $('mr-amount').value=G.currentSession?.buyin||20; openModal('modal-rebuy'); }
-function openAddonModal()  { populateLivePlayerSelects(); $('ma-amount').value=G.currentSession?.buyin||20; openModal('modal-addon'); }
 
 // Override action bar onclick handlers to also populate selects
 document.addEventListener('DOMContentLoaded', () => {
@@ -2046,8 +2031,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')
     ?.setAttribute('onclick', "populateLivePlayerSelects(); $('mr-amount').value = G.currentSession?.buyin || 20; openModal('modal-rebuy')");
 
-  document.querySelector('[onclick="openModal(\'modal-addon\')"]')
-    ?.setAttribute('onclick', "populateLivePlayerSelects(); $('ma-amount').value = G.currentSession?.buyin || 20; openModal('modal-addon')");
 });
 </script>
 </body>
