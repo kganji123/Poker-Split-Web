@@ -1050,7 +1050,7 @@ let supabaseReady = false;
 // ── GOOGLE SIGN IN ──────────────────────────────────────
 async function signInWithGoogle() {
   if (!window.supabaseClient) {
-    showToast('⏳ Loading authentication...');
+    toast('⏳ Loading authentication...');
     // Wait for Supabase to initialize
     await new Promise(resolve => {
       if (window.supabaseReady) resolve();
@@ -1059,7 +1059,7 @@ async function signInWithGoogle() {
   }
   
   try {
-    showToast('Signing in with Google...');
+    toast('Signing in with Google...');
     const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -1071,7 +1071,7 @@ async function signInWithGoogle() {
     
   } catch (error) {
     console.error('Sign in error:', error);
-    showToast('❌ Sign in failed: ' + error.message);
+    toast('❌ Sign in failed: ' + error.message);
   }
 }
 
@@ -1080,17 +1080,17 @@ async function signOut() {
   if (!window.supabaseClient) return;
   
   try {
-    showToast('Signing out...');
+    toast('Signing out...');
     const { error } = await window.supabaseClient.auth.signOut();
     if (error) throw error;
     
     currentUser = null;
-    showToast('✅ Signed out');
+    toast('✅ Signed out');
     updateAuthUI();
     
   } catch (error) {
     console.error('Sign out error:', error);
-    showToast('❌ Sign out failed');
+    toast('❌ Sign out failed');
   }
 }
 
@@ -1156,7 +1156,7 @@ async function initializeAuth() {
       
       if (event === 'SIGNED_IN' && session?.user) {
         currentUser = session.user;
-        showToast(`👋 Welcome, ${currentUser.user_metadata?.full_name || 'there'}!`);
+        toast(`👋 Welcome, ${currentUser.user_metadata?.full_name || 'there'}!`);
         await loadFromSupabase();
         updateAuthUI();
         
