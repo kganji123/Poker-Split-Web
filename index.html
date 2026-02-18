@@ -20,7 +20,7 @@
 <title>PokerSplit — Track. Rebuy. Split. Settle Instantly.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ══════════════════════════════════════════
    DESIGN TOKENS — Golden Yellow + Cream
@@ -638,10 +638,18 @@ select.field-input { cursor: pointer; }
     <div class="logo-badge">🂡</div>
     Poker<span>Split</span>
   </a>
-  <nav class="header-nav">
-    <a href="/hand-history.html" class="nav-link">History</a>
-    <a href="/poker-hands.html"  class="nav-link">Hands</a>
-  </nav>
+
+  <div style="display:flex; align-items:center; gap:10px;">
+    <nav class="header-nav">
+      <a href="/hand-history.html" class="nav-link">History</a>
+      <a href="/poker-hands.html"  class="nav-link">Hands</a>
+    </nav>
+
+    <div id="auth-box" style="display:none; align-items:center; gap:10px;">
+      <span id="auth-email" style="font-size:12px; color:var(--brown-mid); font-weight:700;"></span>
+      <button class="btn btn-outline btn-sm" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
 </header>
 
 <!-- ══════════════════════════════════════════════════
@@ -673,6 +681,9 @@ select.field-input { cursor: pointer; }
     <button class="btn btn-outline" onclick="loadDemo()">
       View Demo League
     </button>
+     <button class="btn btn-firefly" id="btn-google" onclick="signInWithGoogle()" style="margin-top:12px;">
+  Continue with Google
+</button>
 
     <div class="divider" style="margin:28px 0 20px;"></div>
 
@@ -986,6 +997,10 @@ select.field-input { cursor: pointer; }
 ═══════════════════════════════════════════════════ -->
 <script>
 // ── CONSTANTS ──────────────────────────────────────
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+   
 const HAND_RANKS = [
   {key:'royal_flush',    icon:'👑', name:'Royal Flush',     rare:true },
   {key:'straight_flush', icon:'🌟', name:'Straight Flush',  rare:true },
@@ -1017,6 +1032,21 @@ let G = {
 const STORAGE_KEY = 'pokersplit_state_v1';
 const LEGACY_KEYS = ['pokersplit_v1','pokersplit_league_v1','pokersplit_sessions_v1','pokersplit_hands_v1'];
 
+async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin // works for GitHub Pages/custom domain
+    }
+  });
+  if (error) toast("Google sign-in failed");
+}
+
+async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) toast("Sign out failed");
+}
+   
 function snapshotState() {
   // Avoid storing timers/DOM refs
   return {
@@ -2026,6 +2056,27 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     goTo('screen-welcome');
   }
+
+  supabase.auth.onAuthStateChange(async (_event, session) => {
+  const user = session?.user || null;
+
+  const authBox = document.getElementById("auth-box");
+  const authEmail = document.getElementById("auth-email");
+  const btnGoogle = document.getElementById("btn-google");
+
+  if (user) {
+    if (authBox) authBox.style.display = "flex";
+    if (authEmail) authEmail.textContent = user.email || "Signed in";
+    if (btnGoogle) btnGoogle.style.display = "none";
+
+    G.user = { id: user.id, email: user.email };
+    // (D step will load data from Supabase here)
+  } else {
+    if (authBox) authBox.style.display = "none";
+    if (btnGoogle) btnGoogle.style.display = "flex";
+    G.user = null;
+  }
+});
 
   // ✅ Make rebuy/addon buttons populate selects before open
   document.querySelector('[onclick="openModal(\'modal-rebuy\')"]')
