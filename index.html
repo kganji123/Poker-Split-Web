@@ -732,7 +732,7 @@ select.field-input { cursor: pointer; }
         <div style="width:36px; height:36px; border-radius:50%; background:var(--fly); color:var(--brown); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; flex-shrink:0;">3</div>
         <div>
           <div style="font-size:15px; font-weight:700; color:var(--brown); margin-bottom:3px;">Settle instantly</div>
-          <div style="font-size:13px; color:var(--brown-muted); line-height:1.5;">Our algorithm calculates the minimum transactions needed between families. One tap to pay.</div>
+          <div style="font-size:13px; color:var(--brown-muted); line-height:1.5;">Our algorithm calculates the minimum transactions needed between families.</div>
         </div>
       </div>
     </div>
@@ -884,7 +884,7 @@ select.field-input { cursor: pointer; }
   </div>
   <div class="action-bar">
     <div class="action-grid">
-      <div class="action-btn" onclick="openModal('modal-rebuy')"><span>↩</span>Rebuy</div>
+      <div class="action-btn" onclick="openModal('modal-rebuy')"><span>↩</span>Re-Join</div>
       <div class="action-btn" onclick="openModal('modal-addon')"><span>➕</span>Add-on</div>
       <div class="action-btn primary-action" onclick="openHandRecorder()"><span>🃏</span>Hand</div>
       <div class="action-btn" onclick="openChipCount(false)"><span>🔢</span>Count</div>
@@ -1566,7 +1566,11 @@ function renderHome() {
 // ── FAMILIES TAB ──────────────────────────────────────
 function renderFamilies() {
   const standings = getFamilyStandings();
-  return standings.map((f,i)=>{
+  return `
+    <button class="btn btn-primary" onclick="showAddFamilyModal()" style="margin-bottom:20px;">
+      + Add Family
+    </button>
+    ${standings.map((f,i)=>{
     const medals=['🥇','🥈','🥉'];
     const wr = f.sessionsPlayed>0?Math.round(f.wins/f.sessionsPlayed*100):0;
     return `<div class="player-card" style="border-left:4px solid ${f.color};margin-bottom:12px;cursor:pointer;" onclick="showFamilyProfile('${f.id}')">
@@ -1584,7 +1588,7 @@ function renderFamilies() {
         <div style="text-align:center;padding:8px;background:var(--cream-2);border-radius:var(--r-sm);"><div class="mono" style="font-size:16px;color:var(--fly-deep);">${wr}%</div><div style="font-size:10px;color:var(--brown-muted);font-weight:700;text-transform:uppercase;margin-top:2px;">Win Rate</div></div>
       </div>
     </div>`;
-  }).join('');
+  }).join('')}`;
 }
 
 // ── SESSIONS LIST TAB ──────────────────────────────────
@@ -1687,7 +1691,13 @@ function showFamilyProfile(fid) {
   const rival=rivalId?G.families.find(x=>x.id===rivalId):null;
 
   $('dash-content').innerHTML = `
-    <button onclick="switchDashTab('families')" style="background:rgba(44,24,16,0.08);border:none;border-radius:var(--r-sm);padding:8px 14px;font-size:13px;font-weight:700;color:var(--brown-mid);cursor:pointer;margin-bottom:20px;">← Families</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <button onclick="switchDashTab('families')" style="background:rgba(44,24,16,0.08);border:none;border-radius:var(--r-sm);padding:8px 14px;font-size:13px;font-weight:700;color:var(--brown-mid);cursor:pointer;">← Families</button>
+      <div style="display:flex;gap:8px;">
+        <button onclick="showEditFamilyModal('${fid}')" class="btn-outline btn-sm" title="Edit family">✏️ Edit</button>
+        <button onclick="confirmDeleteFamily('${fid}')" class="btn-outline btn-sm" style="color:var(--loss);border-color:var(--loss);" title="Delete family">🗑️</button>
+      </div>
+    </div>
     <div style="text-align:center;padding:0 0 24px;border-bottom:1px solid var(--cream-border);margin-bottom:20px;">
       <div class="avatar avatar-lg" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};border-width:3px;font-size:22px;margin:0 auto 14px;">${initials(f.name)}</div>
       <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:700;">${f.name}</div>
@@ -1699,14 +1709,20 @@ function showFamilyProfile(fid) {
       <div class="stat-tile"><div class="stat-label">Win Rate</div><div class="stat-value firefly">${wr}%</div></div>
       <div class="stat-tile"><div class="stat-label">Rebuys</div><div class="stat-value">${f.members.reduce((s,m)=>s+(m.stats?.rebuys||0),0)}</div></div>
     </div>
-    <div class="sec-head"><div class="section-title" style="font-size:18px;">Members</div></div>
+    <div class="sec-head">
+      <div class="section-title" style="font-size:18px;">Members</div>
+      <button onclick="showAddMemberModal('${fid}')" class="btn-outline btn-sm">+ Add Member</button>
+    </div>
     <div class="player-card">
       ${f.members.map(m=>{
         const net=m.stats?.netResult||0;
-        return `<div class="lb-row" onclick="showPlayerProfile('${m.id}')">
-          <div class="avatar avatar-sm" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};">${initials(m.name)}</div>
-          <div class="lb-info"><div class="lb-name">${m.name}</div><div class="lb-sub">${m.stats?.sessionsPlayed||0} sessions · ${m.stats?.wins||0} wins</div></div>
-          <span class="result-pill ${net>=0?'win':'loss'}">${fmtMoney(net)}</span>
+        return `<div class="lb-row">
+          <div onclick="showPlayerProfile('${m.id}')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">
+            <div class="avatar avatar-sm" style="background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${f.color};">${initials(m.name)}</div>
+            <div class="lb-info"><div class="lb-name">${m.name}</div><div class="lb-sub">${m.stats?.sessionsPlayed||0} sessions · ${m.stats?.wins||0} wins</div></div>
+            <span class="result-pill ${net>=0?'win':'loss'}">${fmtMoney(net)}</span>
+          </div>
+          ${f.members.length > 1 ? `<button onclick="event.stopPropagation();confirmRemoveMember('${fid}','${m.id}')" style="background:none;border:none;color:var(--loss);cursor:pointer;padding:8px;font-size:16px;opacity:0.6;" title="Remove member">🗑️</button>` : ''}
         </div>`;
       }).join('')}
     </div>
@@ -2305,6 +2321,257 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('[onclick="openModal(\'modal-addon\')"]')
     ?.setAttribute('onclick', "populateLivePlayerSelects(); $('ma-amount').value = G.currentSession?.buyin || 20; openModal('modal-addon')");
 });
+
+// ══════════════════════════════════════════════════════
+// FAMILY MANAGEMENT FUNCTIONS
+// ══════════════════════════════════════════════════════
+
+// ── SHOW ADD FAMILY MODAL ─────────────────────────────
+function showAddFamilyModal() {
+  const usedColors = G.families.map(f => f.color);
+  const availableColors = FAM_COLORS.filter(c => !usedColors.includes(c));
+  const defaultColor = availableColors[0] || FAM_COLORS[0];
+  
+  $('modal-family').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">Add New Family</div>
+      <button class="modal-close" onclick="closeModal('modal-family')">×</button>
+    </div>
+    <div class="modal-body">
+      <label>Family Name</label>
+      <input type="text" id="edit-family-name" placeholder="e.g., Smith Family" />
+      
+      <label style="margin-top:16px;">Family Color</label>
+      <div class="color-grid">
+        ${FAM_COLORS.map(c => `
+          <div class="color-choice ${c === defaultColor ? 'active' : ''}" 
+               style="background:${c};" 
+               onclick="selectEditColor('${c}')" 
+               data-color="${c}"></div>
+        `).join('')}
+      </div>
+      
+      <label style="margin-top:16px;">First Member</label>
+      <input type="text" id="edit-member-name" placeholder="e.g., John Smith" />
+      
+      <button class="btn btn-primary" onclick="saveNewFamily()" style="margin-top:24px;width:100%;">
+        Add Family
+      </button>
+    </div>
+  `;
+  
+  G.editingFamilyColor = defaultColor;
+  openModal('modal-family');
+}
+
+// ── SELECT EDIT COLOR ─────────────────────────────────
+function selectEditColor(color) {
+  G.editingFamilyColor = color;
+  document.querySelectorAll('#modal-family .color-choice').forEach(el => {
+    el.classList.toggle('active', el.dataset.color === color);
+  });
+}
+
+// ── SAVE NEW FAMILY ───────────────────────────────────
+function saveNewFamily() {
+  const name = $('edit-family-name').value.trim();
+  const memberName = $('edit-member-name').value.trim();
+  
+  if (!name) {
+    toast('⚠️ Please enter a family name');
+    return;
+  }
+  if (!memberName) {
+    toast('⚠️ Please enter at least one member');
+    return;
+  }
+  
+  const newFamily = {
+    id: uid(),
+    name: name,
+    color: G.editingFamilyColor || FAM_COLORS[0],
+    members: [{
+      id: uid(),
+      name: memberName,
+      stats: { sessionsPlayed: 0, wins: 0, netResult: 0, rebuys: 0, addons: 0, handsByRank: {} }
+    }],
+    stats: { sessionsPlayed: 0, wins: 0, netResult: 0 }
+  };
+  
+  G.families.push(newFamily);
+  saveState();
+  toast(`✅ ${name} added!`);
+  closeModal('modal-family');
+  switchDashTab('families');
+}
+
+// ── SHOW EDIT FAMILY MODAL ────────────────────────────
+function showEditFamilyModal(fid) {
+  const family = G.families.find(f => f.id === fid);
+  if (!family) return;
+  
+  $('modal-family').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">Edit Family</div>
+      <button class="modal-close" onclick="closeModal('modal-family')">×</button>
+    </div>
+    <div class="modal-body">
+      <label>Family Name</label>
+      <input type="text" id="edit-family-name" value="${family.name}" />
+      
+      <label style="margin-top:16px;">Family Color</label>
+      <div class="color-grid">
+        ${FAM_COLORS.map(c => `
+          <div class="color-choice ${c === family.color ? 'active' : ''}" 
+               style="background:${c};" 
+               onclick="selectEditColor('${c}')" 
+               data-color="${c}"></div>
+        `).join('')}
+      </div>
+      
+      <button class="btn btn-primary" onclick="saveEditFamily('${fid}')" style="margin-top:24px;width:100%;">
+        Save Changes
+      </button>
+    </div>
+  `;
+  
+  G.editingFamilyColor = family.color;
+  openModal('modal-family');
+}
+
+// ── SAVE EDIT FAMILY ──────────────────────────────────
+function saveEditFamily(fid) {
+  const family = G.families.find(f => f.id === fid);
+  if (!family) return;
+  
+  const newName = $('edit-family-name').value.trim();
+  if (!newName) {
+    toast('⚠️ Please enter a family name');
+    return;
+  }
+  
+  family.name = newName;
+  family.color = G.editingFamilyColor || family.color;
+  
+  saveState();
+  toast(`✅ ${newName} updated!`);
+  closeModal('modal-family');
+  showFamilyProfile(fid);
+}
+
+// ── SHOW ADD MEMBER MODAL ─────────────────────────────
+function showAddMemberModal(fid) {
+  const family = G.families.find(f => f.id === fid);
+  if (!family) return;
+  
+  $('modal-family').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">Add Member to ${family.name}</div>
+      <button class="modal-close" onclick="closeModal('modal-family')">×</button>
+    </div>
+    <div class="modal-body">
+      <label>Member Name</label>
+      <input type="text" id="edit-member-name" placeholder="e.g., Jane Smith" />
+      
+      <button class="btn btn-primary" onclick="saveNewMember('${fid}')" style="margin-top:24px;width:100%;">
+        Add Member
+      </button>
+    </div>
+  `;
+  
+  openModal('modal-family');
+  setTimeout(() => $('edit-member-name').focus(), 100);
+}
+
+// ── SAVE NEW MEMBER ───────────────────────────────────
+function saveNewMember(fid) {
+  const family = G.families.find(f => f.id === fid);
+  if (!family) return;
+  
+  const name = $('edit-member-name').value.trim();
+  if (!name) {
+    toast('⚠️ Please enter a member name');
+    return;
+  }
+  
+  const newMember = {
+    id: uid(),
+    name: name,
+    stats: { sessionsPlayed: 0, wins: 0, netResult: 0, rebuys: 0, addons: 0, handsByRank: {} }
+  };
+  
+  family.members.push(newMember);
+  saveState();
+  toast(`✅ ${name} added to ${family.name}!`);
+  closeModal('modal-family');
+  showFamilyProfile(fid);
+}
+
+// ── CONFIRM REMOVE MEMBER ─────────────────────────────
+function confirmRemoveMember(fid, mid) {
+  const family = G.families.find(f => f.id === fid);
+  if (!family) return;
+  
+  const member = family.members.find(m => m.id === mid);
+  if (!member) return;
+  
+  if (family.members.length === 1) {
+    toast('⚠️ Cannot remove the last member. Delete the family instead.');
+    return;
+  }
+  
+  // Check if member has played sessions
+  const hasPlayed = G.sessions.some(s => 
+    s.players && s.players.some(p => p.id === mid)
+  );
+  
+  if (hasPlayed) {
+    if (!confirm(`⚠️ ${member.name} has played in sessions. Remove anyway? Their stats will be preserved in history but they won't appear in future sessions.`)) {
+      return;
+    }
+  } else {
+    if (!confirm(`Remove ${member.name} from ${family.name}?`)) {
+      return;
+    }
+  }
+  
+  family.members = family.members.filter(m => m.id !== mid);
+  saveState();
+  toast(`✅ ${member.name} removed`);
+  showFamilyProfile(fid);
+}
+
+// ── CONFIRM DELETE FAMILY ─────────────────────────────
+function confirmDeleteFamily(fid) {
+  const family = G.families.find(f => f.id === fid);
+  if (!family) return;
+  
+  if (G.families.length === 1) {
+    toast('⚠️ Cannot delete the last family. You need at least one family.');
+    return;
+  }
+  
+  // Check if family has played sessions
+  const hasPlayed = G.sessions.some(s => 
+    s.players && s.players.some(p => p.familyId === fid)
+  );
+  
+  if (hasPlayed) {
+    if (!confirm(`⚠️ ${family.name} has played in ${family.stats.sessionsPlayed} session(s). Delete anyway? All member stats will be lost but historical session data will remain.`)) {
+      return;
+    }
+  } else {
+    if (!confirm(`Delete ${family.name} and all ${family.members.length} member(s)?`)) {
+      return;
+    }
+  }
+  
+  G.families = G.families.filter(f => f.id !== fid);
+  saveState();
+  toast(`✅ ${family.name} deleted`);
+  switchDashTab('families');
+}
+
 </script>
 </body>
 </html>
