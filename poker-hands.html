@@ -1,1 +1,322 @@
-<!DOCTYPE html><html><head><title>Poker Hands</title></head><body><h1>Poker Hands Guide</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f4b300">
+<meta name="description" content="PokerSplit — Complete poker hand rankings with examples. From Royal Flush to High Card.">
+<title>PokerSplit — Hand Rankings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fly:         #f4b300;
+  --fly-deep:    #b38200;
+  --fly-mid:     #f9c52e;
+  --fly-light:   #fdd96a;
+  --fly-pale:    #feeab0;
+  --fly-glow:    rgba(244,179,0,0.18);
+  --cream-bg:     #FDF6EC;
+  --cream:        #FAF0DC;
+  --cream-2:      #F5E8C8;
+  --cream-card:   #FFFDF8;
+  --cream-border: rgba(200,145,0,0.15);
+  --cream-border2:rgba(200,145,0,0.25);
+  --brown:        #2C1810;
+  --brown-mid:    #5C3420;
+  --brown-muted:  #8B6040;
+  --brown-faint:  #BFA080;
+  --safe-top:     env(safe-area-inset-top, 44px);
+  --safe-bottom:  env(safe-area-inset-bottom, 20px);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--fly);color:var(--brown);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 10%, rgba(255,220,80,0.35) 0%,transparent 55%),radial-gradient(ellipse 60% 60% at 85% 90%, rgba(200,140,0,0.18) 0%,transparent 55%);pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;max-width:440px;margin:0 auto;min-height:100vh;}
+
+/* HEADER */
+.site-header{padding:calc(var(--safe-top) + 12px) 20px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:80;background:rgba(249,197,46,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(180,120,0,0.15);}
+.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--brown);text-decoration:none;display:flex;align-items:center;gap:10px;}
+.logo-badge{width:38px;height:38px;border-radius:12px;background:var(--brown);color:var(--fly-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.logo span{color:var(--fly-deep);}
+.header-nav{display:flex;gap:4px;}
+.nav-link{font-size:12px;font-weight:700;color:var(--brown-mid);text-decoration:none;padding:7px 12px;border-radius:8px;transition:all 0.2s;border:1px solid transparent;}
+.nav-link:hover,.nav-link.active{background:rgba(44,24,16,0.10);border-color:rgba(44,24,16,0.12);color:var(--brown);}
+
+/* HERO */
+.hero{padding:36px 20px 24px;text-align:center;position:relative;}
+.hero-suit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:240px;opacity:0.04;pointer-events:none;color:var(--brown);user-select:none;animation:drift 9s ease-in-out infinite;}
+@keyframes drift{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg) translateY(-10px);}}
+.hero-title{font-family:'Fraunces',serif;font-size:42px;font-weight:900;line-height:1;color:var(--brown);letter-spacing:-1px;margin-bottom:10px;}
+.hero-title em{color:var(--fly-deep);font-style:italic;}
+.hero-sub{font-size:14px;color:var(--brown-mid);line-height:1.6;max-width:300px;margin:0 auto;}
+
+/* MAIN CARD */
+.main-card{background:var(--cream-card);border-radius:28px 28px 0 0;border:1px solid var(--cream-border2);border-bottom:none;padding:24px 20px;box-shadow:0 -8px 32px rgba(140,80,20,0.12);min-height:calc(100vh - 280px);}
+
+/* HAND CARDS */
+.hand-card{background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:20px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.22s;}
+.hand-card:active{transform:scale(0.99);}
+.hand-card.expanded{border-color:var(--fly);}
+.hand-card-top{display:flex;align-items:center;gap:14px;}
+.rank-badge{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;}
+.hand-meta{flex:1;}
+.hand-rank-num{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--brown-muted);margin-bottom:4px;}
+.hand-name{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown);line-height:1;}
+.hand-rarity{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px;}
+.hand-odds{font-family:'DM Mono',monospace;font-size:13px;color:var(--brown-muted);text-align:right;flex-shrink:0;}
+
+/* Expand panel */
+.hand-detail{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--cream-border2);}
+.hand-detail.show{display:block;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.hand-desc{font-size:14px;color:var(--brown-mid);line-height:1.6;margin-bottom:14px;}
+
+/* Playing cards row */
+.cards-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.playing-card{width:36px;height:50px;border-radius:6px;background:#FFFDF8;border:1.5px solid rgba(44,24,16,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:'DM Mono',monospace;box-shadow:0 2px 6px rgba(0,0,0,0.15);flex-shrink:0;color:var(--brown);}
+.playing-card.red{color:#C62828;}
+
+.hand-tip{display:flex;gap:8px;padding:10px 14px;background:rgba(244,179,0,0.08);border:1px solid rgba(244,179,0,0.2);border-radius:10px;}
+.tip-icon{font-size:16px;flex-shrink:0;}
+.tip-text{font-size:12px;color:var(--brown-mid);line-height:1.5;}
+
+/* Rarity colors */
+.rarity-legendary{background:rgba(255,215,0,0.15);color:#8A6500;}
+.rarity-rare{background:rgba(155,114,207,0.12);color:#5B3A9E;}
+.rarity-uncommon{background:rgba(46,125,50,0.10);color:#1B5E20;}
+.rarity-common{background:rgba(44,24,16,0.08);color:var(--brown-muted);}
+
+/* Badge backgrounds per hand */
+.badge-royal{background:rgba(255,215,0,0.15);}
+.badge-sf{background:rgba(255,107,157,0.12);}
+.badge-quads{background:rgba(155,114,207,0.12);}
+.badge-fh{background:rgba(78,205,196,0.12);}
+.badge-flush{background:rgba(69,183,209,0.12);}
+.badge-straight{background:rgba(150,206,180,0.15);}
+.badge-trips{background:rgba(255,234,167,0.3);}
+.badge-twopair{background:rgba(221,160,221,0.15);}
+.badge-pair{background:rgba(152,216,200,0.2);}
+.badge-high{background:rgba(176,184,180,0.2);}
+
+/* Quick reference strip at top */
+.quick-ref{display:flex;gap:6px;overflow-x:auto;padding:0 0 8px;margin-bottom:20px;}
+.quick-ref::-webkit-scrollbar{display:none;}
+.qr-chip{flex-shrink:0;padding:6px 12px;border-radius:20px;background:var(--cream-2);border:1px solid var(--cream-border2);font-size:12px;font-weight:700;color:var(--brown-mid);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.qr-chip:active{background:rgba(244,179,0,0.15);border-color:rgba(244,179,0,0.3);color:var(--fly-deep);}
+
+/* Suit legend */
+.suit-legend{display:flex;gap:12px;justify-content:center;margin-bottom:20px;}
+.suit-item{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--brown-muted);}
+
+/* Section title */
+.sec-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown);margin-bottom:4px;}
+.sec-sub{font-size:13px;color:var(--brown-muted);margin-bottom:16px;}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:rgba(250,240,220,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1.5px solid var(--cream-border2);display:flex;justify-content:space-around;align-items:center;padding:10px 4px calc(var(--safe-bottom) + 8px);z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:8px;transition:all 0.2s;flex:1;text-decoration:none;}
+.nav-icon{font-size:22px;}
+.nav-label{font-size:10px;color:var(--brown-faint);font-weight:700;letter-spacing:0.3px;text-transform:uppercase;transition:color 0.2s;}
+.nav-item.active .nav-label{color:var(--fly-deep);}
+.page-body{padding-bottom:calc(90px + var(--safe-bottom));}
+
+/* expand chevron */
+.chevron{margin-left:auto;font-size:14px;color:var(--brown-faint);transition:transform 0.25s;flex-shrink:0;}
+.hand-card.expanded .chevron{transform:rotate(180deg);}
+
+/* Probability bar */
+.prob-bar{height:5px;background:var(--cream-2);border-radius:3px;overflow:hidden;margin-top:8px;}
+.prob-fill{height:100%;background:linear-gradient(90deg,var(--fly-deep),var(--fly-light));border-radius:3px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header class="site-header">
+  <a href="index.html" class="logo">
+    <div class="logo-badge">🂡</div>
+    Poker<span>Split</span>
+  </a>
+  <nav class="header-nav">
+    <a href="index.html"         class="nav-link">Game</a>
+    <a href="poker-hands.html"   class="nav-link active">Hands</a>
+    <a href="hand-history.html"  class="nav-link">History</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-suit">♣</div>
+  <h1 class="hero-title">Hand<br><em>Rankings</em></h1>
+  <p class="hero-sub">All 10 poker hands ranked from best to worst. Tap any hand to see examples.</p>
+</div>
+
+<div class="main-card page-body">
+
+  <!-- Suit legend -->
+  <div class="suit-legend">
+    <div class="suit-item"><span style="font-size:18px;">♠</span> Spades</div>
+    <div class="suit-item"><span style="font-size:18px;color:#C62828;">♥</span> Hearts</div>
+    <div class="suit-item"><span style="font-size:18px;color:#C62828;">♦</span> Diamonds</div>
+    <div class="suit-item"><span style="font-size:18px;">♣</span> Clubs</div>
+  </div>
+
+  <!-- Quick scroll chips -->
+  <div class="quick-ref" id="quick-ref"></div>
+
+  <div class="sec-title">All 10 Hands</div>
+  <div class="sec-sub">Ranked best to worst. Tap to expand.</div>
+
+  <div id="hands-list"></div>
+</div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <a href="index.html"        class="nav-item"><span class="nav-icon">🎮</span><span class="nav-label">Game</span></a>
+  <a href="poker-hands.html"  class="nav-item active"><span class="nav-icon">📖</span><span class="nav-label">Hands</span></a>
+  <a href="hand-history.html" class="nav-item"><span class="nav-icon">📜</span><span class="nav-label">History</span></a>
+  <a href="leaderboard.html"  class="nav-item"><span class="nav-icon">🏆</span><span class="nav-label">Board</span></a>
+  <a href="settlement.html"   class="nav-item"><span class="nav-icon">💰</span><span class="nav-label">Settle</span></a>
+</div>
+
+<script>
+const HANDS = [
+  {
+    key:'royal_flush', icon:'👑', name:'Royal Flush',
+    badgeClass:'badge-royal', rarityClass:'rarity-legendary', rarity:'Legendary',
+    odds:'1 in 649,739', prob:0.000154,
+    cards:[{v:'A',s:'♠'},{v:'K',s:'♠'},{v:'Q',s:'♠'},{v:'J',s:'♠'},{v:'T',s:'♠'}],
+    desc:'The best possible hand in poker. Ace, King, Queen, Jack and Ten — all of the same suit. Unbeatable.',
+    tip:'There are only 4 possible Royal Flushes in a 52-card deck — one per suit. If you get one, celebrate loudly.',
+  },
+  {
+    key:'straight_flush', icon:'🌟', name:'Straight Flush',
+    badgeClass:'badge-sf', rarityClass:'rarity-legendary', rarity:'Very Rare',
+    odds:'1 in 72,193', prob:0.00139,
+    cards:[{v:'9',s:'♥',r:true},{v:'8',s:'♥',r:true},{v:'7',s:'♥',r:true},{v:'6',s:'♥',r:true},{v:'5',s:'♥',r:true}],
+    desc:'Five consecutive cards all of the same suit. The Royal Flush is technically a special case of this hand.',
+    tip:'The highest card determines its rank. A J-high Straight Flush beats a 9-high Straight Flush.',
+  },
+  {
+    key:'four_of_a_kind', icon:'🔮', name:'Four of a Kind',
+    badgeClass:'badge-quads', rarityClass:'rarity-rare', rarity:'Rare',
+    odds:'1 in 4,165', prob:0.024,
+    cards:[{v:'J',s:'♠'},{v:'J',s:'♥',r:true},{v:'J',s:'♦',r:true},{v:'J',s:'♣'},{v:'A',s:'♠'}],
+    desc:'All four cards of the same rank, plus any fifth card called the "kicker".',
+    tip:'If two players both have quads (extremely rare), the higher four-of-a-kind wins.',
+  },
+  {
+    key:'full_house', icon:'🏠', name:'Full House',
+    badgeClass:'badge-fh', rarityClass:'rarity-uncommon', rarity:'Uncommon',
+    odds:'1 in 694', prob:0.144,
+    cards:[{v:'K',s:'♠'},{v:'K',s:'♥',r:true},{v:'K',s:'♦',r:true},{v:'T',s:'♠'},{v:'T',s:'♣'}],
+    desc:'Three cards of one rank combined with two cards of another rank. "Kings full of Tens."',
+    tip:'Ranked first by the three-of-a-kind, then by the pair. K-K-K-T-T beats Q-Q-Q-A-A.',
+  },
+  {
+    key:'flush', icon:'♠', name:'Flush',
+    badgeClass:'badge-flush', rarityClass:'rarity-uncommon', rarity:'Uncommon',
+    odds:'1 in 509', prob:0.197,
+    cards:[{v:'A',s:'♠'},{v:'J',s:'♠'},{v:'8',s:'♠'},{v:'6',s:'♠'},{v:'3',s:'♠'}],
+    desc:'Any five cards of the same suit, not in sequence.',
+    tip:'Compared card by card from highest to lowest. An Ace-high flush always beats a King-high flush.',
+  },
+  {
+    key:'straight', icon:'→', name:'Straight',
+    badgeClass:'badge-straight', rarityClass:'rarity-uncommon', rarity:'Uncommon',
+    odds:'1 in 255', prob:0.392,
+    cards:[{v:'T',s:'♣'},{v:'9',s:'♥',r:true},{v:'8',s:'♦',r:true},{v:'7',s:'♠'},{v:'6',s:'♣'}],
+    desc:'Five consecutive cards of mixed suits. Ace can be high (A-K-Q-J-T) or low (A-2-3-4-5).',
+    tip:'An Ace-low straight (A-2-3-4-5) is called a "wheel" and is the lowest possible straight.',
+  },
+  {
+    key:'three_of_a_kind', icon:'△', name:'Three of a Kind',
+    badgeClass:'badge-trips', rarityClass:'rarity-common', rarity:'Common',
+    odds:'1 in 47', prob:2.11,
+    cards:[{v:'Q',s:'♠'},{v:'Q',s:'♥',r:true},{v:'Q',s:'♦',r:true},{v:'7',s:'♣'},{v:'2',s:'♠'}],
+    desc:'Three cards of the same rank plus two unrelated cards.',
+    tip:'"Trips" means three of a kind using the community board. "Set" means you hold a pocket pair and hit one on the board.',
+  },
+  {
+    key:'two_pair', icon:'⊞', name:'Two Pair',
+    badgeClass:'badge-twopair', rarityClass:'rarity-common', rarity:'Common',
+    odds:'1 in 21', prob:4.75,
+    cards:[{v:'A',s:'♠'},{v:'A',s:'♥',r:true},{v:'9',s:'♣'},{v:'9',s:'♦',r:true},{v:'K',s:'♠'}],
+    desc:'Two separate pairs of cards, plus any fifth card as a kicker.',
+    tip:'Ranked by the highest pair first, then the second pair, then the kicker.',
+  },
+  {
+    key:'one_pair', icon:'○', name:'One Pair',
+    badgeClass:'badge-pair', rarityClass:'rarity-common', rarity:'Very Common',
+    odds:'1 in 2.4', prob:42.3,
+    cards:[{v:'T',s:'♥',r:true},{v:'T',s:'♦',r:true},{v:'A',s:'♠'},{v:'K',s:'♣'},{v:'4',s:'♠'}],
+    desc:'Two cards of the same rank plus three unrelated cards.',
+    tip:'The most common winning hand in a casual game. The three remaining cards are your kickers.',
+  },
+  {
+    key:'high_card', icon:'↑', name:'High Card',
+    badgeClass:'badge-high', rarityClass:'rarity-common', rarity:'Most Common',
+    odds:'1 in 1', prob:50.1,
+    cards:[{v:'A',s:'♠'},{v:'J',s:'♣'},{v:'9',s:'♥',r:true},{v:'5',s:'♦',r:true},{v:'2',s:'♠'}],
+    desc:'No combination at all — the hand is valued by its highest card. The weakest possible hand.',
+    tip:'If both players have High Card, compare highest cards one by one until one is higher.',
+  },
+];
+
+function renderCard(c) {
+  return `<div class="playing-card ${c.r?'red':''}">${c.v}${c.s}</div>`;
+}
+
+function renderHandCard(h, i) {
+  const maxProb = 50.1;
+  return `
+    <div class="hand-card" id="hc-${h.key}" onclick="toggleHand('${h.key}')">
+      <div class="hand-card-top">
+        <div class="rank-badge ${h.badgeClass}" style="font-size:28px;">${h.icon}</div>
+        <div class="hand-meta">
+          <div class="hand-rank-num">#${i+1} of 10</div>
+          <div class="hand-name">${h.name}</div>
+          <span class="hand-rarity ${h.rarityClass}">${h.rarity}</span>
+          <div class="prob-bar" style="width:120px;margin-top:6px;"><div class="prob-fill" style="width:${Math.min(h.prob/maxProb*100,100)}%"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="hand-odds">${h.odds}</div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="hand-detail" id="hd-${h.key}">
+        <div class="cards-row">${h.cards.map(renderCard).join('')}</div>
+        <div class="hand-desc">${h.desc}</div>
+        <div class="hand-tip"><span class="tip-icon">💡</span><span class="tip-text">${h.tip}</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleHand(key) {
+  const card = document.getElementById('hc-'+key);
+  const detail = document.getElementById('hd-'+key);
+  const isOpen = detail.classList.contains('show');
+  // close all
+  document.querySelectorAll('.hand-detail.show').forEach(d => { d.classList.remove('show'); d.closest('.hand-card').classList.remove('expanded'); });
+  if (!isOpen) { detail.classList.add('show'); card.classList.add('expanded'); card.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+
+function scrollToHand(key) {
+  const el = document.getElementById('hc-'+key);
+  if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>toggleHand(key), 300); }
+}
+
+// Render quick-ref chips
+document.getElementById('quick-ref').innerHTML = HANDS.map(h =>
+  `<div class="qr-chip" onclick="scrollToHand('${h.key}')">${h.icon} ${h.name}</div>`
+).join('');
+
+// Render hand list
+document.getElementById('hands-list').innerHTML = HANDS.map((h,i) => renderHandCard(h,i)).join('');
+</script>
+</body>
+</html>

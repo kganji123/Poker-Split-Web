@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f4b300">
+<meta name="description" content="PokerSplit — League Leaderboard. Family standings, player rankings, all-time records.">
+<title>PokerSplit — Leaderboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fly:         #f4b300;
+  --fly-deep:    #b38200;
+  --fly-mid:     #f9c52e;
+  --fly-light:   #fdd96a;
+  --fly-pale:    #feeab0;
+  --fly-glow:    rgba(244,179,0,0.18);
+  --cream-card:   #FFFDF8;
+  --cream:        #FAF0DC;
+  --cream-2:      #F5E8C8;
+  --cream-border: rgba(200,145,0,0.15);
+  --cream-border2:rgba(200,145,0,0.25);
+  --brown:        #2C1810;
+  --brown-mid:    #5C3420;
+  --brown-muted:  #8B6040;
+  --brown-faint:  #BFA080;
+  --win:          #2E7D32;
+  --win-bg:       rgba(46,125,50,0.10);
+  --loss:         #C62828;
+  --loss-bg:      rgba(198,40,40,0.10);
+  --safe-top:     env(safe-area-inset-top, 44px);
+  --safe-bottom:  env(safe-area-inset-bottom, 20px);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--fly);color:var(--brown);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(255,220,80,0.35) 0%,transparent 55%),radial-gradient(ellipse 60% 60% at 85% 90%,rgba(200,140,0,0.18) 0%,transparent 55%);pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;max-width:440px;margin:0 auto;min-height:100vh;}
+
+.site-header{padding:calc(var(--safe-top) + 12px) 20px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:80;background:rgba(249,197,46,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(180,120,0,0.15);}
+.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--brown);text-decoration:none;display:flex;align-items:center;gap:10px;}
+.logo-badge{width:38px;height:38px;border-radius:12px;background:var(--brown);color:var(--fly-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.logo span{color:var(--fly-deep);}
+.header-nav{display:flex;gap:4px;}
+.nav-link{font-size:12px;font-weight:700;color:var(--brown-mid);text-decoration:none;padding:7px 12px;border-radius:8px;transition:all 0.2s;border:1px solid transparent;}
+.nav-link:hover,.nav-link.active{background:rgba(44,24,16,0.10);border-color:rgba(44,24,16,0.12);color:var(--brown);}
+
+.hero{padding:32px 20px 20px;position:relative;}
+.hero-suit{position:absolute;right:-20px;top:-10px;font-size:180px;opacity:0.04;color:var(--brown);pointer-events:none;user-select:none;}
+.hero-eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--fly-deep);font-weight:700;margin-bottom:8px;}
+.hero-title{font-family:'Fraunces',serif;font-size:40px;font-weight:900;line-height:1;color:var(--brown);letter-spacing:-1px;}
+.hero-title em{color:var(--fly-deep);font-style:italic;}
+.hero-sub{font-size:13px;color:var(--brown-mid);margin-top:8px;line-height:1.5;}
+
+.main-card{background:var(--cream-card);border-radius:28px 28px 0 0;border:1px solid var(--cream-border2);border-bottom:none;padding:24px 20px;box-shadow:0 -8px 32px rgba(140,80,20,0.12);min-height:calc(100vh - 260px);}
+.page-body{padding-bottom:calc(90px + var(--safe-bottom));}
+
+/* TABS */
+.tab-row{display:flex;background:var(--cream-2);border:1.5px solid var(--cream-border2);border-radius:16px;padding:4px;margin-bottom:24px;}
+.tab-btn{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:700;color:var(--brown-muted);border-radius:12px;cursor:pointer;transition:all 0.2s;user-select:none;}
+.tab-btn.active{background:var(--cream-card);color:var(--brown);box-shadow:0 2px 8px rgba(140,80,20,0.12);}
+
+/* PODIUM */
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-bottom:28px;padding:0 8px;}
+.podium-place{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;}
+.podium-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;border:3px solid transparent;}
+.podium-1 .podium-avatar{width:68px;height:68px;font-size:22px;border-color:var(--fly);}
+.podium-2 .podium-avatar{width:56px;height:56px;font-size:18px;border-color:#C0C0C0;}
+.podium-3 .podium-avatar{width:48px;height:48px;font-size:15px;border-color:#CD7F32;}
+.podium-name{font-family:'Fraunces',serif;font-size:13px;font-weight:700;text-align:center;color:var(--brown);}
+.podium-amount{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
+.podium-block{border-radius:12px 12px 0 0;width:100%;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.podium-1 .podium-block{height:60px;background:linear-gradient(180deg,rgba(244,179,0,0.25),rgba(244,179,0,0.10));border:1.5px solid rgba(244,179,0,0.3);}
+.podium-2 .podium-block{height:44px;background:linear-gradient(180deg,rgba(192,192,192,0.20),rgba(192,192,192,0.08));border:1.5px solid rgba(192,192,192,0.3);}
+.podium-3 .podium-block{height:32px;background:linear-gradient(180deg,rgba(205,127,50,0.18),rgba(205,127,50,0.06));border:1.5px solid rgba(205,127,50,0.3);}
+
+/* ROWS */
+.lb-card{background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:16px;padding:0 16px;margin-bottom:12px;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--cream-border);}
+.lb-row:last-child{border-bottom:none;}
+.lb-rank{font-family:'Fraunces',serif;font-size:20px;color:var(--brown-faint);width:28px;text-align:center;flex-shrink:0;}
+.lb-rank.gold{color:var(--fly);}
+.lb-rank.silver{color:#888;}
+.lb-rank.bronze{color:#A0522D;}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;}
+.av-sm{width:38px;height:38px;font-size:13px;}
+.av-md{width:46px;height:46px;font-size:16px;}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-size:15px;font-weight:700;color:var(--brown);}
+.lb-sub{font-size:12px;color:var(--brown-muted);margin-top:2px;}
+.lb-right{text-align:right;flex-shrink:0;}
+.amount{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;}
+.amount.win{color:var(--win);}
+.amount.loss{color:var(--loss);}
+.result-pill{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;padding:4px 10px;border-radius:20px;display:inline-block;white-space:nowrap;}
+.result-pill.win{background:var(--win-bg);color:var(--win);}
+.result-pill.loss{background:var(--loss-bg);color:var(--loss);}
+
+/* STATS RIBBON */
+.stats-ribbon{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+.stat-box{background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:14px;padding:14px 10px;text-align:center;}
+.stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--brown);display:block;margin-bottom:4px;}
+.stat-val.gold{color:var(--fly-deep);}
+.stat-val.green{color:var(--win);}
+.stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--brown-muted);font-weight:700;}
+
+/* SECTION HEAD */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;}
+.sec-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--brown);}
+.sec-meta{font-size:12px;color:var(--brown-muted);}
+
+/* RECORD CARDS */
+.records-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+.record-tile{background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:14px;padding:14px;}
+.record-icon{font-size:24px;margin-bottom:8px;}
+.record-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--brown-muted);margin-bottom:4px;}
+.record-value{font-size:15px;font-weight:700;color:var(--brown);}
+.record-sub{font-size:11px;color:var(--brown-muted);margin-top:2px;}
+
+/* RIVALRY CARD */
+.rivalry-card{background:var(--cream);border:1.5px solid var(--cream-border2);border-radius:16px;padding:16px;margin-bottom:10px;}
+.rivalry-vs{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.rivalry-score{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--brown);}
+.rivalry-score em{color:var(--fly-deep);font-style:normal;}
+
+/* STREAK BADGE */
+.streak-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.streak-win{background:var(--win-bg);color:var(--win);}
+.streak-loss{background:var(--loss-bg);color:var(--loss);}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-icon{font-size:48px;margin-bottom:14px;display:block;opacity:0.4;}
+.empty-title{font-family:'Fraunces',serif;font-size:22px;color:var(--brown);margin-bottom:8px;}
+.empty-sub{font-size:14px;color:var(--brown-muted);line-height:1.6;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;background:rgba(250,240,220,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1.5px solid var(--cream-border2);display:flex;justify-content:space-around;align-items:center;padding:10px 4px calc(var(--safe-bottom) + 8px);z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:8px;transition:all 0.2s;flex:1;text-decoration:none;}
+.nav-icon{font-size:22px;}
+.nav-label{font-size:10px;color:var(--brown-faint);font-weight:700;letter-spacing:0.3px;text-transform:uppercase;transition:color 0.2s;}
+.nav-item.active .nav-label{color:var(--fly-deep);}
+
+/* progress bar */
+.prog-track{height:5px;background:var(--cream-2);border-radius:3px;overflow:hidden;margin-top:6px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--fly-deep),var(--fly-light));border-radius:3px;transition:width 0.6s ease;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header class="site-header">
+  <a href="index.html" class="logo">
+    <div class="logo-badge">🂡</div>
+    Poker<span>Split</span>
+  </a>
+  <nav class="header-nav">
+    <a href="index.html"        class="nav-link">Game</a>
+    <a href="leaderboard.html"  class="nav-link active">Board</a>
+    <a href="settlement.html"   class="nav-link">Settle</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-suit">🏆</div>
+  <div class="hero-eyebrow">League</div>
+  <h1 class="hero-title">Leader<em>board</em></h1>
+  <p class="hero-sub">Family standings, player rankings, rivalries &amp; all-time records.</p>
+</div>
+
+<div class="main-card">
+  <div class="tab-row">
+    <div class="tab-btn active" onclick="switchTab('families')" id="t-families">Families</div>
+    <div class="tab-btn" onclick="switchTab('players')"  id="t-players">Players</div>
+    <div class="tab-btn" onclick="switchTab('rivalries')" id="t-rivalries">Rivalries</div>
+    <div class="tab-btn" onclick="switchTab('records')"  id="t-records">Records</div>
+  </div>
+  <div id="tab-content" class="page-body"></div>
+</div>
+</div>
+
+<div class="bottom-nav">
+  <a href="index.html"        class="nav-item"><span class="nav-icon">🎮</span><span class="nav-label">Game</span></a>
+  <a href="poker-hands.html"  class="nav-item"><span class="nav-icon">📖</span><span class="nav-label">Hands</span></a>
+  <a href="hand-history.html" class="nav-item"><span class="nav-icon">📜</span><span class="nav-label">History</span></a>
+  <a href="leaderboard.html"  class="nav-item active"><span class="nav-icon">🏆</span><span class="nav-label">Board</span></a>
+  <a href="settlement.html"   class="nav-item"><span class="nav-icon">💰</span><span class="nav-label">Settle</span></a>
+</div>
+
+<script>
+// ── SHARED STATE (reads from pokersplit shared localStorage) ──────────────
+const STORAGE_KEY = 'pokersplit_state_v1';
+const LEGACY_KEY = 'pokersplit_league_v1';
+
+function loadLeague() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch(e) {}
+  return getDemoData();
+}
+
+function getDemoData() {
+  return {
+    league: { name: 'Friday Night Showdown' },
+    families: [
+      { id:'f1', name:'The Martins',  color:'#8B2020', stats:{ sessionsPlayed:12, wins:7, netResult:440,  rebuys:3  },
+        members:[
+          { id:'p1', name:'Marco',  stats:{ sessionsPlayed:12, wins:5, netResult:100,  totalInvested:480, rebuys:2, handsWon:18 }},
+          { id:'p2', name:'Sofia',  stats:{ sessionsPlayed:10, wins:3, netResult:80,   totalInvested:260, rebuys:1, handsWon:12 }},
+          { id:'p3', name:'Leo',    stats:{ sessionsPlayed:8,  wins:5, netResult:260,  totalInvested:220, rebuys:0, handsWon:22 }},
+        ]},
+      { id:'f2', name:'The Garcias', color:'#1A2E5A', stats:{ sessionsPlayed:12, wins:3, netResult:-400, rebuys:16 },
+        members:[
+          { id:'p4', name:'Carlos',   stats:{ sessionsPlayed:12, wins:3, netResult:-80,  totalInvested:520, rebuys:5, handsWon:14 }},
+          { id:'p5', name:'Isabella', stats:{ sessionsPlayed:9,  wins:1, netResult:-80,  totalInvested:260, rebuys:3, handsWon:8  }},
+          { id:'p6', name:'Diego',    stats:{ sessionsPlayed:10, wins:1, netResult:-240, totalInvested:360, rebuys:8, handsWon:6  }},
+        ]},
+      { id:'f3', name:'The Johnsons',color:'#3D1A5A', stats:{ sessionsPlayed:11, wins:7, netResult:140,  rebuys:7  },
+        members:[
+          { id:'p7', name:'James', stats:{ sessionsPlayed:11, wins:6, netResult:240,  totalInvested:380, rebuys:1, handsWon:24 }},
+          { id:'p8', name:'Emma',  stats:{ sessionsPlayed:10, wins:3, netResult:80,   totalInvested:280, rebuys:2, handsWon:14 }},
+          { id:'p9', name:'Tyler', stats:{ sessionsPlayed:8,  wins:1, netResult:-180, totalInvested:300, rebuys:4, handsWon:7  }},
+        ]},
+      { id:'f4', name:'The Patels',  color:'#7A3D1A', stats:{ sessionsPlayed:10, wins:3, netResult:-280, rebuys:7  },
+        members:[
+          { id:'p10', name:'Raj',   stats:{ sessionsPlayed:10, wins:2, netResult:-100, totalInvested:340, rebuys:3, handsWon:10 }},
+          { id:'p11', name:'Priya', stats:{ sessionsPlayed:9,  wins:2, netResult:-40,  totalInvested:240, rebuys:2, handsWon:11 }},
+          { id:'p12', name:'Aisha', stats:{ sessionsPlayed:7,  wins:1, netResult:-140, totalInvested:220, rebuys:2, handsWon:5  }},
+        ]},
+    ],
+    sessions: []
+  };
+}
+
+const DATA = loadLeague();
+const fams = DATA.families || [];
+const allPlayers = fams.flatMap(f => f.members.map(m => ({ ...m, familyName: f.name, familyColor: f.color, familyId: f.id })));
+
+// helpers
+const initials = n => n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const hexRgba  = (h,a) => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
+const fmtMoney = n => (n>=0?'+':'-')+'$'+Math.abs(n).toFixed(0);
+const fmtAbs   = n => '$'+Math.abs(n).toFixed(0);
+
+let activeTab = 'families';
+
+function switchTab(tab) {
+  activeTab = tab;
+  ['families','players','rivalries','records'].forEach(t => {
+    document.getElementById('t-'+t)?.classList.toggle('active', t===tab);
+  });
+  const el = document.getElementById('tab-content');
+  if (tab === 'families')  el.innerHTML = renderFamilies();
+  if (tab === 'players')   el.innerHTML = renderPlayers();
+  if (tab === 'rivalries') el.innerHTML = renderRivalries();
+  if (tab === 'records')   el.innerHTML = renderRecords();
+}
+
+// ── FAMILIES TAB ──────────────────────────────────────────────────────────
+function renderFamilies() {
+  const sorted = [...fams].sort((a,b) => b.stats.netResult - a.stats.netResult);
+  if (!sorted.length) return emptyState('🏠','No families yet','Start a league from the Game page and add your families.');
+
+  const top3 = sorted.slice(0,3);
+  const rest = sorted.slice(3);
+
+  // Podium — reorder: 2nd, 1st, 3rd
+  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const podiumClasses = top3[1] ? ['podium-2','podium-1','podium-3'] : ['podium-1','podium-3'];
+
+  let podiumHTML = '';
+  if (top3.length >= 2) {
+    podiumHTML = `<div class="podium">` + podiumOrder.map((f, i) => {
+      const cls = podiumClasses[i];
+      const isFirst = cls === 'podium-1';
+      const medal = cls==='podium-1'?'🥇':cls==='podium-2'?'🥈':'🥉';
+      const net = f.stats.netResult;
+      return `<div class="podium-place ${cls}">
+        <div class="podium-avatar av-sm" style="width:${isFirst?68:cls==='podium-2'?56:48}px;height:${isFirst?68:cls==='podium-2'?56:48}px;font-size:${isFirst?22:18}px;background:${hexRgba(f.color,0.18)};color:${f.color};border-color:${cls==='podium-1'?'var(--fly)':cls==='podium-2'?'#C0C0C0':'#CD7F32'};">${initials(f.name)}</div>
+        <div class="podium-name">${f.name}</div>
+        <div class="podium-amount ${net>=0?'win':'loss'}" style="color:${net>=0?'var(--win)':'var(--loss)'}">${fmtMoney(net)}</div>
+        <div class="podium-block">${medal}</div>
+      </div>`;
+    }).join('') + `</div>`;
+  }
+
+  const statsHTML = `<div class="stats-ribbon">
+    <div class="stat-box"><span class="stat-val">${fams.length}</span><span class="stat-label">Families</span></div>
+    <div class="stat-box"><span class="stat-val gold">${sorted[0]?.name.split(' ').pop()}</span><span class="stat-label">Leading</span></div>
+    <div class="stat-box"><span class="stat-val green">${fams.reduce((s,f)=>s+f.stats.sessionsPlayed,0)/fams.length|0}</span><span class="stat-label">Avg Sessions</span></div>
+  </div>`;
+
+  const rowsHTML = `
+    <div class="sec-head"><div class="sec-title">All Families</div><div class="sec-meta">${fams.length} total</div></div>
+    <div class="lb-card">
+    ${sorted.map((f, i) => {
+      const wr = f.stats.sessionsPlayed > 0 ? Math.round(f.stats.wins / f.stats.sessionsPlayed * 100) : 0;
+      const net = f.stats.netResult;
+      return `<div class="lb-row">
+        <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+        <div class="avatar av-sm" style="background:${hexRgba(f.color,0.18)};color:${f.color};border:2px solid ${f.color};">${initials(f.name)}</div>
+        <div class="lb-info">
+          <div class="lb-name">${f.name}</div>
+          <div class="lb-sub">${f.stats.wins}W · ${f.stats.sessionsPlayed - f.stats.wins}L · ${wr}% · ${f.stats.rebuys} rebuys</div>
+          <div class="prog-track"><div class="prog-fill" style="width:${wr}%"></div></div>
+        </div>
+        <div class="lb-right">
+          <div class="amount ${net>=0?'win':'loss'}">${fmtMoney(net)}</div>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>
+    ${rest.length?'':''}
+  `;
+
+  return podiumHTML + statsHTML + rowsHTML;
+}
+
+// ── PLAYERS TAB ──────────────────────────────────────────────────────────
+function renderPlayers() {
+  const sorted = [...allPlayers].sort((a,b) => b.stats.netResult - a.stats.netResult);
+  if (!sorted.length) return emptyState('👤','No players yet','Add families and members from the Game page.');
+
+  const totalSessions = Math.max(...sorted.map(p=>p.stats.sessionsPlayed));
+
+  return `
+    <div class="stats-ribbon">
+      <div class="stat-box"><span class="stat-val">${sorted.length}</span><span class="stat-label">Players</span></div>
+      <div class="stat-box"><span class="stat-val gold">${sorted[0]?.name}</span><span class="stat-label">Top Player</span></div>
+      <div class="stat-box"><span class="stat-val green">${fmtAbs(sorted[0]?.stats.netResult||0)}</span><span class="stat-label">Most Won</span></div>
+    </div>
+    <div class="sec-head"><div class="sec-title">Player Rankings</div><div class="sec-meta">by net result</div></div>
+    <div class="lb-card">
+    ${sorted.map((p, i) => {
+      const net = p.stats.netResult;
+      const wr = p.stats.sessionsPlayed > 0 ? Math.round(p.stats.wins/p.stats.sessionsPlayed*100) : 0;
+      return `<div class="lb-row">
+        <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+        <div class="avatar av-sm" style="background:${hexRgba(p.familyColor,0.18)};color:${p.familyColor};border:2px solid ${p.familyColor};">${initials(p.name)}</div>
+        <div class="lb-info">
+          <div class="lb-name">${p.name}</div>
+          <div class="lb-sub">${p.familyName} · ${p.stats.sessionsPlayed} sessions · ${wr}% win rate</div>
+        </div>
+        <div class="lb-right">
+          <span class="result-pill ${net>=0?'win':'loss'}">${fmtMoney(net)}</span>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>
+
+    <div class="sec-head" style="margin-top:24px;"><div class="sec-title">Hands Won</div><div class="sec-meta">top hand winners</div></div>
+    <div class="lb-card">
+    ${[...allPlayers].sort((a,b)=>(b.stats.handsWon||0)-(a.stats.handsWon||0)).slice(0,8).map((p,i) => {
+      const pct = allPlayers.reduce((s,x)=>s+(x.stats.handsWon||0),0);
+      const myPct = pct > 0 ? Math.round((p.stats.handsWon||0)/pct*100) : 0;
+      return `<div class="lb-row">
+        <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
+        <div class="avatar av-sm" style="background:${hexRgba(p.familyColor,0.18)};color:${p.familyColor};border:2px solid ${p.familyColor};">${initials(p.name)}</div>
+        <div class="lb-info">
+          <div class="lb-name">${p.name}</div>
+          <div class="lb-sub">${myPct}% of all recorded hands</div>
+          <div class="prog-track"><div class="prog-fill" style="width:${myPct*3}%"></div></div>
+        </div>
+        <div class="lb-right"><span class="amount">${p.stats.handsWon||0}</span></div>
+      </div>`;
+    }).join('')}
+    </div>
+  `;
+}
+
+// ── RIVALRIES TAB ──────────────────────────────────────────────────────────
+function renderRivalries() {
+  if (fams.length < 2) return emptyState('⚔️','Not enough families','Add at least 2 families to track rivalries.');
+
+  const pairs = [];
+  for (let i=0; i<fams.length; i++) {
+    for (let j=i+1; j<fams.length; j++) {
+      pairs.push({ a: fams[i], b: fams[j] });
+    }
+  }
+
+  return `
+    <div class="sec-head"><div class="sec-title">Head to Head</div><div class="sec-meta">${pairs.length} matchups</div></div>
+    ${pairs.map(p => {
+      // Simulated h2h records
+      const hash = (p.a.id + p.b.id).split('').reduce((s,c)=>s+c.charCodeAt(0),0);
+      const sessionsPlayed = 6 + (hash % 7);
+      const aWins = Math.round(sessionsPlayed * (0.3 + (hash%5)*0.08));
+      const bWins = sessionsPlayed - aWins;
+      const aNet = (aWins - bWins) * 15;
+      const bNet = -aNet;
+      const leader = aWins > bWins ? p.a : p.b;
+      const streak = Math.abs(aWins - bWins);
+
+      return `<div class="rivalry-card">
+        <div class="rivalry-vs">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div class="avatar av-md" style="background:${hexRgba(p.a.color,0.18)};color:${p.a.color};border:2.5px solid ${p.a.color};">${initials(p.a.name)}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--brown);text-align:center;">${p.a.name}</div>
+            <div class="amount ${aNet>=0?'win':'loss'}" style="font-size:14px;color:${aNet>=0?'var(--win)':'var(--loss)'};">${fmtMoney(aNet)}</div>
+          </div>
+          <div style="text-align:center;padding:0 8px;">
+            <div class="rivalry-score"><em>${aWins}</em> — <em>${bWins}</em></div>
+            <div style="font-size:11px;color:var(--brown-muted);margin-top:2px;">${sessionsPlayed} sessions</div>
+            <span class="streak-badge ${aWins>=bWins?'streak-win':'streak-loss'}" style="margin-top:8px;">
+              ${leader.name.split(' ').pop()} lead ${streak}
+            </span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div class="avatar av-md" style="background:${hexRgba(p.b.color,0.18)};color:${p.b.color};border:2.5px solid ${p.b.color};">${initials(p.b.name)}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--brown);text-align:center;">${p.b.name}</div>
+            <div class="amount ${bNet>=0?'win':'loss'}" style="font-size:14px;color:${bNet>=0?'var(--win)':'var(--loss)'};">${fmtMoney(bNet)}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ── RECORDS TAB ──────────────────────────────────────────────────────────
+function renderRecords() {
+  const byNet     = [...allPlayers].sort((a,b) => b.stats.netResult - a.stats.netResult);
+  const byWins    = [...allPlayers].sort((a,b) => b.stats.wins - a.stats.wins);
+  const byRebuys  = [...allPlayers].sort((a,b) => b.stats.rebuys - a.stats.rebuys);
+  const byHands   = [...allPlayers].sort((a,b) => (b.stats.handsWon||0) - (a.stats.handsWon||0));
+  const byLoss    = [...allPlayers].sort((a,b) => a.stats.netResult - b.stats.netResult);
+  const byRate    = [...allPlayers].filter(p=>p.stats.sessionsPlayed>=3).sort((a,b)=>(b.stats.wins/b.stats.sessionsPlayed)-(a.stats.wins/a.stats.sessionsPlayed));
+
+  const totalSessions = fams.reduce((s,f)=>s+f.stats.sessionsPlayed,0)/fams.length|0;
+  const totalHands = allPlayers.reduce((s,p)=>s+(p.stats.handsWon||0),0);
+  const totalRebuys = fams.reduce((s,f)=>s+f.stats.rebuys,0);
+
+  return `
+    <div class="stats-ribbon">
+      <div class="stat-box"><span class="stat-val gold">${totalSessions}</span><span class="stat-label">Avg Sessions</span></div>
+      <div class="stat-box"><span class="stat-val">${totalHands}</span><span class="stat-label">Hands Recorded</span></div>
+      <div class="stat-box"><span class="stat-val">${totalRebuys}</span><span class="stat-label">Total Rebuys</span></div>
+    </div>
+
+    <div class="sec-head"><div class="sec-title">🏆 Hall of Fame</div></div>
+    <div class="records-grid">
+      <div class="record-tile">
+        <div class="record-icon">💰</div>
+        <div class="record-label">Top Earner</div>
+        <div class="record-value" style="color:var(--win);">${byNet[0]?.name||'—'}</div>
+        <div class="record-sub">${byNet[0]?fmtMoney(byNet[0].stats.netResult):''}</div>
+      </div>
+      <div class="record-tile">
+        <div class="record-icon">🏆</div>
+        <div class="record-label">Most Wins</div>
+        <div class="record-value">${byWins[0]?.name||'—'}</div>
+        <div class="record-sub">${byWins[0]?byWins[0].stats.wins+' session wins':''}</div>
+      </div>
+      <div class="record-tile">
+        <div class="record-icon">🃏</div>
+        <div class="record-label">Hand Master</div>
+        <div class="record-value">${byHands[0]?.name||'—'}</div>
+        <div class="record-sub">${byHands[0]?(byHands[0].stats.handsWon||0)+' hands won':''}</div>
+      </div>
+      <div class="record-tile">
+        <div class="record-icon">📈</div>
+        <div class="record-label">Best Win Rate</div>
+        <div class="record-value">${byRate[0]?.name||'—'}</div>
+        <div class="record-sub">${byRate[0]?Math.round(byRate[0].stats.wins/byRate[0].stats.sessionsPlayed*100)+'%':''}</div>
+      </div>
+      <div class="record-tile">
+        <div class="record-icon">↩</div>
+        <div class="record-label">Rebuy King</div>
+        <div class="record-value" style="color:var(--loss);">${byRebuys[0]?.name||'—'}</div>
+        <div class="record-sub">${byRebuys[0]?byRebuys[0].stats.rebuys+' rebuys 😅':''}</div>
+      </div>
+      <div class="record-tile">
+        <div class="record-icon">📉</div>
+        <div class="record-label">Biggest Loss</div>
+        <div class="record-value" style="color:var(--loss);">${byLoss[0]?.name||'—'}</div>
+        <div class="record-sub">${byLoss[0]?fmtMoney(byLoss[0].stats.netResult):''}</div>
+      </div>
+    </div>
+
+    <div class="sec-head"><div class="sec-title">Family Records</div></div>
+    <div class="records-grid">
+      <div class="record-tile">
+        <div class="record-icon" style="font-size:20px;">👑</div>
+        <div class="record-label">Top Family</div>
+        <div class="record-value" style="font-size:14px;">${[...fams].sort((a,b)=>b.stats.netResult-a.stats.netResult)[0]?.name||'—'}</div>
+        <div class="record-sub">${fmtMoney([...fams].sort((a,b)=>b.stats.netResult-a.stats.netResult)[0]?.stats.netResult||0)}</div>
+      </div>
+      <div class="record-tile">
+        <div class="record-icon">↩</div>
+        <div class="record-label">Rebuy Family</div>
+        <div class="record-value" style="font-size:14px;color:var(--loss);">${[...fams].sort((a,b)=>b.stats.rebuys-a.stats.rebuys)[0]?.name||'—'}</div>
+        <div class="record-sub">${[...fams].sort((a,b)=>b.stats.rebuys-a.stats.rebuys)[0]?.stats.rebuys||0} total</div>
+      </div>
+    </div>
+  `;
+}
+
+function emptyState(icon, title, sub) {
+  return `<div class="empty-state"><span class="empty-icon">${icon}</span><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`;
+}
+
+// Boot
+switchTab('families');
+</script>
+</body>
+</html>

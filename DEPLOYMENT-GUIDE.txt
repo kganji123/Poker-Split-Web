@@ -1,0 +1,243 @@
+POKERSPLIT - DEPLOYMENT GUIDE
+==============================
+
+All files are ready to deploy. No tokens included.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 FILES IN THIS PACKAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Production Website Files (6 files):
+────────────────────────────────────
+✅ index.html (107 KB) - Main app with game setup, live sessions, settlements
+✅ hand-history.html (70 KB) - Hand tracking, stats, player rankings
+✅ poker-hands.html (18 KB) - Visual poker hand rankings reference
+✅ leaderboard.html (30 KB) - Family standings, rivalries, records
+✅ settlement.html (8 KB) - Balance tracking, payment management
+✅ README.md (6 KB) - Full documentation
+
+Total: 237 KB - Zero dependencies
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 DEPLOYMENT OPTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 1: GitHub Pages (Recommended - Free & Fast)
+───────────────────────────────────────────────────
+
+Step 1: Upload to GitHub
+  1. Go to: https://github.com/Kganji123/poker-split-web
+  2. Click "Add file" → "Upload files"
+  3. Drag & drop all 6 files (5 HTML + README.md)
+  4. Commit message: "Deploy PokerSplit v1.0"
+  5. Click "Commit changes"
+
+Step 2: Enable GitHub Pages
+  1. Go to: Settings → Pages
+  2. Source: Deploy from branch
+  3. Branch: main
+  4. Folder: / (root)
+  5. Click "Save"
+
+Step 3: Wait & Visit
+  ⏱️  Wait 60-90 seconds for deployment
+  🌐 Live at: https://kganji123.github.io/poker-split-web
+
+Step 4: Custom Domain (Optional)
+  1. Same Settings → Pages screen
+  2. Custom domain: pokersplit.com
+  3. ✓ Enforce HTTPS
+  4. Save
+  5. Wait 5-10 minutes for SSL certificate
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 2: Git Command Line
+───────────────────────────
+
+cd /path/to/poker-split-web
+
+# Copy all 6 files to repo directory
+# Then:
+
+git add index.html hand-history.html poker-hands.html leaderboard.html settlement.html README.md
+git commit -m "Deploy PokerSplit v1.0 - Complete app"
+git push origin main
+
+# Then enable GitHub Pages in Settings → Pages
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 3: Other Hosting Providers
+──────────────────────────────────
+
+Netlify:
+  1. Drag & drop all 6 files to https://app.netlify.com/drop
+  2. Done! Instant deployment
+
+Vercel:
+  1. Create new project
+  2. Upload all 6 files
+  3. Deploy
+
+Cloudflare Pages:
+  1. Create new Pages project
+  2. Upload files
+  3. Deploy
+
+Any Static Host:
+  - Just upload all 6 HTML + README files
+  - No server-side processing needed
+  - Works on any static file host
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ VERIFICATION CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After deployment, verify:
+
+□ All files visible in repository
+□ GitHub Pages enabled in Settings → Pages
+□ Site loads at your GitHub Pages URL
+□ All 5 pages accessible:
+  - / (index.html - main app)
+  - /hand-history.html
+  - /poker-hands.html
+  - /leaderboard.html
+  - /settlement.html
+□ Navigation works between pages
+□ Golden yellow theme consistent across all pages
+□ Mobile responsive (test on phone)
+□ "Add to Home Screen" works on iOS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 DESIGN SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Colors:
+  Primary: #f4b300 (Golden yellow)
+  Background: #f9c52e (Warm golden)
+  Cards: #FFFDF8 (Cream)
+  Text: #2C1810 (Deep brown)
+
+Fonts:
+  Display: Fraunces (serif, 900 weight)
+  Body: Plus Jakarta Sans (400-700 weights)
+  Mono: DM Mono (numbers/amounts)
+
+Mobile-First:
+  Max width: 440px
+  Safe area insets for iPhone
+  Touch-optimized (44px minimum targets)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💾 DATA STORAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All data stored in browser localStorage:
+  Key: pokersplit_league_v1
+
+Export/Backup:
+  Open browser console (F12)
+  Run: localStorage.getItem('pokersplit_league_v1')
+  Copy the output and save it
+
+Import/Restore:
+  Open browser console (F12)
+  Run: localStorage.setItem('pokersplit_league_v1', 'YOUR_BACKUP_JSON')
+  Reload page
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 TECH STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework: None - Pure HTML/CSS/JavaScript
+Dependencies: 0 (except Google Fonts)
+Build Process: None
+Total Size: 237 KB
+Browser Support: Chrome, Safari, Firefox, Edge (modern)
+
+Features:
+  ✅ Pure vanilla JavaScript (ES6+)
+  ✅ CSS3 with variables
+  ✅ localStorage persistence
+  ✅ PWA-ready (installable)
+  ✅ Works offline
+  ✅ No npm, no webpack, no build
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Main App (index.html):
+  ✅ Create poker league
+  ✅ Add families with members
+  ✅ Start live sessions
+  ✅ Track rebuys & add-ons
+  ✅ Record chip counts
+  ✅ Auto-calculate settlements (minimum transactions)
+  ✅ Dashboard with stats
+
+Hand History (hand-history.html):
+  ✅ Record winning hands
+  ✅ View hand frequency charts
+  ✅ Player hand statistics
+  ✅ Royal Flush tracker
+
+Hand Rankings (poker-hands.html):
+  ✅ Interactive reference card
+  ✅ All 10 hands with examples
+  ✅ Expandable cards with tips
+
+Leaderboard (leaderboard.html):
+  ✅ Family standings
+  ✅ Player rankings
+  ✅ Head-to-head rivalries
+  ✅ All-time records
+
+Settlements (settlement.html):
+  ✅ Outstanding balances
+  ✅ Mark payments
+  ✅ Settlement history
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🆘 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Site not loading after GitHub Pages enable:
+  - Wait full 2 minutes (can take up to 5 min)
+  - Check Settings → Pages shows green checkmark
+  - Try incognito/private window
+
+Pages look different:
+  - Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+  - Clear browser cache
+
+Navigation not working:
+  - Make sure all 5 HTML files uploaded to root (not subfolder)
+  - Check file names are lowercase exactly as shown
+
+Mobile issues:
+  - Designed for max-width 440px
+  - Works best in portrait mode
+  - "Add to Home Screen" for app-like experience
+
+Data lost:
+  - localStorage is per-domain
+  - If domain changes, data stays on old domain
+  - Export/backup data before domain changes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📞 SUPPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For issues or questions:
+  - Open issue on GitHub repo
+  - Check browser console (F12) for errors
+  - Verify all 6 files uploaded correctly
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ready to deploy! 🚀
+
+Upload all 6 files to GitHub and your poker app goes live! 🎉

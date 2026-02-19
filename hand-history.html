@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f4b300">
+<meta name="description" content="PokerSplit — Track winning hands, build hand history, and see who dominates your private poker league.">
+<title>PokerSplit — Hand History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Syne:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS — Deep Casino Noir
+══════════════════════════════════════════ */
+:root {
+  /* Golden #f4b300 spectrum */
+  --fly-deep:   #b38200;
+  --fly:        #f4b300;
+  --fly-mid:    #f9c52e;
+  --fly-light:  #fdd96a;
+  --fly-pale:   #feeab0;
+  --fly-glow:   rgba(244,179,0,0.18);
+
+  /* Cream / surface spectrum */
+  --cream-bg:     #FDF6EC;
+  --cream:        #FAF0DC;
+  --cream-2:      #F5E8C8;
+  --cream-card:   #FFFDF8;
+  --cream-border: rgba(200,145,0,0.15);
+  --cream-border2:rgba(200,145,0,0.25);
+
+  /* Brown text spectrum */
+  --brown-deep:   #1E0E04;
+  --brown:        #2C1810;
+  --brown-mid:    #5C3420;
+  --brown-muted:  #8B6040;
+  --brown-faint:  #BFA080;
+
+  /* Semantic */
+  --win:          #2E7D32;
+  --win-bg:       rgba(46,125,50,0.10);
+  --loss:         #C62828;
+  --loss-bg:      rgba(198,40,40,0.10);
+  --rare:       #9B72CF;
+  --rare-bg:    rgba(155,114,207,0.12);
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+
+  /* Hand rank colors */
+  --royal:    #FFD700;
+  --sf:       #FF6B9D;
+  --quads:    #9B72CF;
+  --fh:       #4ECDC4;
+  --flush:    #45B7D1;
+  --straight: #96CEB4;
+  --trips:    #FFEAA7;
+  --twopair:  #DDA0DD;
+  --pair:     #98D8C8;
+  --high:     #B0B8B4;
+}
+
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--fly);
+  color: var(--brown);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Atmospheric background */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 5%,  rgba(244,179,0,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 60% at 90% 95%,  rgba(210,145,0,0.18) 0%, transparent 55%);
+  pointer-events: none; z-index: 0;
+}
+
+/* Subtle noise grain overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.4; pointer-events: none; z-index: 0;
+}
+
+#app { position: relative; z-index: 1; max-width: 440px; margin: 0 auto; min-height: 100vh; }
+
+/* ══════════════════════════════════════════
+   TYPOGRAPHY
+══════════════════════════════════════════ */
+.display { font-family: 'Fraunces', serif; }
+.mono    { font-family: 'DM Mono', monospace; }
+.label   { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--brown-muted); font-weight: 600; }
+
+/* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
+.site-header {
+  padding: calc(var(--safe-top) + 12px) 20px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 80;
+  background: rgba(244,179,0,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(200,145,0,0.18);
+}
+
+.logo {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; font-weight: 900;
+  color: var(--brown); letter-spacing: -0.5px;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-badge {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--brown); color: var(--fly-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.logo span { color: var(--fly-deep); }
+
+.header-nav { display: flex; gap: 4px; }
+.nav-link {
+  font-size: 12px; font-weight: 700; color: var(--brown-mid);
+  text-decoration: none; padding: 7px 12px; border-radius: 8px;
+  transition: all 0.2s; letter-spacing: 0.2px;
+  border: 1px solid transparent;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(44,24,16,0.10);
+  border-color: rgba(44,24,16,0.12);
+  color: var(--brown);
+}
+
+/* ══════════════════════════════════════════
+   PAGE HERO
+══════════════════════════════════════════ */
+.hero {
+  padding: 40px 20px 32px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+.hero-suit {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 260px; opacity: 0.04; pointer-events: none;
+  animation: suitDrift 10s ease-in-out infinite;
+  color: var(--brown); user-select: none; line-height: 1;
+}
+@keyframes suitDrift {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(-12px) rotate(5deg); }
+}
+
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(44,24,16,0.10); color: var(--brown-mid);
+  padding: 6px 14px; border-radius: 20px; font-size: 11px;
+  font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  border: 1px solid rgba(44,24,16,0.12); margin-bottom: 16px;
+}
+
+.hero-title {
+  font-family: 'Fraunces', serif;
+  font-size: 52px; font-weight: 900; line-height: 0.95;
+  color: var(--brown); letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+.hero-title em { color: var(--fly-deep); font-style: italic; }
+
+.hero-sub {
+  font-size: 15px; color: var(--brown-mid); line-height: 1.7;
+  max-width: 320px; margin: 0 auto 32px; font-weight: 500;
+}
+
+/* ══════════════════════════════════════════
+   TABS / VIEWS
+══════════════════════════════════════════ */
+.view-tabs {
+  display: flex; background: var(--brown-mid);
+  border: 1px solid var(--cream-border); border-radius: var(--r-lg);
+  padding: 4px; margin: 0 20px 28px;
+}
+.view-tab {
+  flex: 1; padding: 10px 8px;
+  text-align: center; font-size: 13px; font-weight: 600;
+  color: var(--brown-muted); border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.25s; user-select: none;
+}
+.view-tab.active {
+  background: var(--cream);
+  color: var(--cream-card);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ══════════════════════════════════════════
+   SESSION SELECTOR
+══════════════════════════════════════════ */
+.session-selector {
+  padding: 0 20px; margin-bottom: 24px;
+}
+.session-select-label {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--brown-muted); font-weight: 600; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.session-pills {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+}
+.session-pills::-webkit-scrollbar { display: none; }
+.session-pill {
+  flex-shrink: 0; padding: 8px 16px;
+  border-radius: 20px; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--cream-border); color: var(--brown-muted);
+  background: var(--cream-card); cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.session-pill.active {
+  background: var(--fly-glow); color: var(--fly);
+  border-color: rgba(244,179,0,0.35);
+}
+.session-pill.all { background: var(--cream-2); }
+
+/* ══════════════════════════════════════════
+   HAND RECORDING PANEL
+══════════════════════════════════════════ */
+.record-panel {
+  margin: 0 20px 24px;
+  background: var(--cream-card);
+  border: 1px solid var(--cream-border2);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.record-panel-header {
+  padding: 18px 20px 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.record-panel-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px; font-weight: 600; color: var(--cream-card);
+}
+.record-panel-body { padding: 16px 20px 20px; }
+
+/* Hand rank selector grid */
+.rank-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 6px; margin-bottom: 16px;
+}
+.rank-card {
+  aspect-ratio: 1; border-radius: var(--r-sm);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  background: var(--brown-mid); border: 1.5px solid var(--cream-border);
+  cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.rank-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--rank-color, transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.rank-card:active, .rank-card.selected {
+  border-color: var(--rank-color, var(--fly));
+  box-shadow: 0 0 0 1px var(--rank-color, var(--fly)),
+              0 4px 12px rgba(0,0,0,0.4);
+  transform: scale(0.96);
+}
+.rank-card.selected::before { opacity: 0.12; }
+.rank-card .r-icon { font-size: 22px; position: relative; }
+.rank-card .r-abbr {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; color: var(--brown-muted); position: relative;
+  letter-spacing: 0px;
+}
+.rank-card.selected .r-abbr { color: var(--rank-color, var(--fly)); }
+
+/* Form fields in recording panel */
+.record-fields {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 14px;
+}
+.record-field label {
+  display: block; font-size: 10px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--brown-muted);
+  font-weight: 600; margin-bottom: 6px;
+}
+.record-input {
+  width: 100%; background: var(--brown); border: 1px solid var(--cream-border);
+  border-radius: var(--r-sm); padding: 11px 14px; color: var(--cream-card);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; outline: none;
+  transition: border-color 0.2s; -webkit-appearance: none;
+}
+.record-input:focus { border-color: rgba(244,179,0,0.4); }
+.record-input::placeholder { color: var(--brown-mid); }
+select.record-input { cursor: pointer; }
+option { background: var(--brown); }
+
+.record-field.full { grid-column: 1 / -1; }
+
+.notable-toggle {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; cursor: pointer;
+}
+.toggle-box {
+  width: 44px; height: 26px; border-radius: 13px;
+  background: var(--brown-mid); border: 1px solid var(--cream-border2);
+  position: relative; transition: background 0.25s; flex-shrink: 0;
+}
+.toggle-box::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--brown-muted); top: 2px; left: 2px;
+  transition: all 0.25s;
+}
+.toggle-box.on { background: rgba(244,179,0,0.2); border-color: rgba(244,179,0,0.4); }
+.toggle-box.on::after { background: var(--fly); transform: translateX(18px); }
+.notable-toggle-label { font-size: 13px; color: var(--brown-faint); }
+
+.record-note-row {
+  display: none; margin-bottom: 16px;
+  animation: fadeIn 0.2s ease;
+}
+.record-note-row.show { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+/* Submit button */
+.btn-record {
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg, var(--fly) 0%, #9A7520 100%);
+  color: var(--brown-deep); font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 700; border: none; border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(244,179,0,0.25);
+  letter-spacing: 0.3px;
+}
+.btn-record:active { transform: scale(0.98); opacity: 0.9; }
+.btn-record:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ══════════════════════════════════════════
+   STATS ROW
+══════════════════════════════════════════ */
+.stats-ribbon {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; padding: 0 20px; margin-bottom: 28px;
+}
+.stat-box {
+  background: var(--cream-card); border: 1px solid var(--cream-border);
+  border-radius: var(--r-md); padding: 14px 10px; text-align: center;
+}
+.stat-box-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px; font-weight: 500; color: var(--cream-card);
+  display: block; margin-bottom: 4px;
+}
+.stat-box-value.gold { color: var(--fly); }
+.stat-box-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--brown-muted); }
+
+/* ══════════════════════════════════════════
+   HAND FREQUENCY CHART
+══════════════════════════════════════════ */
+.frequency-section { padding: 0 20px; margin-bottom: 28px; }
+.section-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 24px; font-weight: 600; line-height: 1;
+}
+.section-meta { font-size: 12px; color: var(--brown-muted); }
+
+.freq-bar-list { display: flex; flex-direction: column; gap: 10px; }
+.freq-bar-item {
+  display: grid;
+  grid-template-columns: 28px 1fr 40px;
+  align-items: center; gap: 10px;
+}
+.freq-icon { font-size: 20px; text-align: center; }
+.freq-bar-wrap { position: relative; }
+.freq-bar-track {
+  height: 28px; background: var(--brown-mid); border-radius: 6px;
+  overflow: hidden; border: 1px solid var(--cream-border);
+}
+.freq-bar-fill {
+  height: 100%; border-radius: 6px;
+  display: flex; align-items: center; padding: 0 10px;
+  transition: width 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative; min-width: 0;
+}
+.freq-bar-name {
+  font-size: 11px; font-weight: 600; color: var(--brown-deep);
+  white-space: nowrap; overflow: hidden; opacity: 0.85;
+}
+.freq-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px; font-weight: 500; color: var(--brown-faint);
+  text-align: right;
+}
+
+/* ══════════════════════════════════════════
+   HAND HISTORY LIST
+══════════════════════════════════════════ */
+.history-section { padding: 0 20px; margin-bottom: 28px; }
+
+.filter-row {
+  display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; border: 1px solid var(--cream-border);
+  color: var(--brown-muted); background: var(--cream-card); cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.filter-chip.active {
+  color: var(--cream-card); border-color: var(--cream-border2);
+  background: var(--cream);
+}
+.filter-chip.notable-filter.active {
+  color: var(--fly); border-color: rgba(244,179,0,0.3);
+  background: var(--fly-glow);
+}
+.filter-chip.rare-filter.active {
+  color: var(--rare); border-color: rgba(155,114,207,0.3);
+  background: var(--rare-bg);
+}
+
+.hand-list { display: flex; flex-direction: column; gap: 10px; }
+
+.hand-card {
+  background: var(--cream-card); border: 1px solid var(--cream-border);
+  border-radius: var(--r-lg); padding: 16px;
+  transition: border-color 0.2s;
+  animation: cardIn 0.3s ease both;
+  position: relative; overflow: hidden;
+}
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.hand-card.notable-card {
+  border-color: rgba(244,179,0,0.2);
+}
+.hand-card.notable-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--fly), transparent);
+  border-radius: 0 0 0 var(--r-lg);
+}
+.hand-card.rare-card {
+  border-color: rgba(155,114,207,0.3);
+}
+.hand-card.rare-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--rare), transparent);
+  border-radius: 0 0 0 var(--r-lg);
+}
+
+.hand-card-top {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+}
+.hand-rank-badge {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0; position: relative;
+}
+.hand-card-meta { flex: 1; min-width: 0; }
+.hand-winner-name {
+  font-size: 16px; font-weight: 700; color: var(--cream-card);
+  margin-bottom: 3px;
+  display: flex; align-items: center; gap: 6px;
+}
+.hand-rank-label {
+  font-size: 13px; font-weight: 600; margin-bottom: 2px;
+}
+.hand-details-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.detail-chip {
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  background: var(--brown-mid); color: var(--brown-muted);
+  font-family: 'DM Mono', monospace;
+  border: 1px solid var(--cream-border);
+}
+.detail-chip.pot { color: var(--fly-light); border-color: rgba(244,179,0,0.2); }
+.detail-chip.time { }
+
+.hand-note-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 12px; border-radius: var(--r-sm);
+  background: rgba(244,179,0,0.06); border: 1px solid rgba(244,179,0,0.15);
+  margin-top: 4px;
+}
+.hand-note-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.hand-note-text { font-size: 13px; color: var(--brown-faint); line-height: 1.5; font-style: italic; }
+
+.hand-cards-row {
+  display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;
+}
+.playing-card {
+  width: 32px; height: 42px; border-radius: 5px;
+  background: var(--cream-card); color: var(--brown-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; font-family: 'DM Mono', monospace;
+  border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.playing-card.hearts, .playing-card.diamonds { color: #C0392B; }
+
+.hand-card-actions {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;
+}
+.action-btn {
+  font-size: 11px; font-weight: 600; padding: 5px 12px;
+  border-radius: 20px; cursor: pointer; transition: all 0.2s;
+  border: 1px solid var(--cream-border); color: var(--brown-muted);
+  background: var(--brown-mid);
+}
+.action-btn:hover { color: var(--cream-card); border-color: var(--cream-border2); }
+.action-btn.delete:hover { color: var(--loss); border-color: rgba(217,79,61,0.3); }
+
+/* ══════════════════════════════════════════
+   LEADERBOARD BY HANDS
+══════════════════════════════════════════ */
+.leaderboard-section { padding: 0 20px; margin-bottom: 28px; }
+
+.player-hand-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--cream-border);
+}
+.player-hand-row:last-child { border-bottom: none; }
+.rank-num {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; font-weight: 700; color: var(--brown-muted);
+  width: 28px; text-align: center; flex-shrink: 0;
+}
+.rank-num.one   { color: var(--fly); }
+.rank-num.two   { color: #C0C0C0; }
+.rank-num.three { color: #CD7F32; }
+.player-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+}
+.player-hand-info { flex: 1; min-width: 0; }
+.player-hand-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.player-hand-sub  { font-size: 12px; color: var(--brown-muted); }
+.player-hand-best { text-align: right; flex-shrink: 0; }
+.best-hand-icon { font-size: 22px; display: block; margin-bottom: 2px; text-align: right; }
+.best-hand-label { font-size: 10px; color: var(--brown-muted); white-space: nowrap; }
+
+/* ══════════════════════════════════════════
+   ROYAL FLUSH TRACKER
+══════════════════════════════════════════ */
+.royal-tracker {
+  margin: 0 20px 28px;
+  background: linear-gradient(135deg, rgba(255,215,0,0.06) 0%, rgba(155,114,207,0.06) 100%);
+  border: 1px solid rgba(255,215,0,0.15);
+  border-radius: var(--r-xl); padding: 24px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.royal-tracker::before {
+  content: '👑';
+  position: absolute; font-size: 120px;
+  top: -20px; right: -20px; opacity: 0.06;
+  animation: royalFloat 6s ease-in-out infinite;
+}
+@keyframes royalFloat {
+  0%,100% { transform: rotate(-10deg) scale(1); }
+  50%      { transform: rotate(10deg) scale(1.05); }
+}
+.royal-count {
+  font-family: 'Fraunces', serif;
+  font-size: 56px; font-weight: 700; color: var(--fly);
+  line-height: 1; margin-bottom: 4px;
+  text-shadow: 0 0 40px rgba(244,179,0,0.4);
+}
+.royal-label {
+  font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--brown-muted); margin-bottom: 12px;
+}
+.royal-sub {
+  font-size: 14px; color: var(--brown-faint); line-height: 1.6;
+}
+.royal-never {
+  font-size: 11px; color: var(--brown-muted); margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.royal-never::before, .royal-never::after {
+  content: ''; flex: 1; max-width: 60px; height: 1px;
+  background: var(--cream-border2);
+}
+
+/* ══════════════════════════════════════════
+   HAND RANK KEY (legend)
+══════════════════════════════════════════ */
+.rank-key {
+  margin: 0 20px 28px;
+  background: var(--cream-card); border: 1px solid var(--cream-border);
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.rank-key-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--cream-border);
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+}
+.rank-key-title {
+  font-family: 'Fraunces', serif;
+  font-size: 18px; font-weight: 600;
+}
+.rank-key-toggle { color: var(--brown-muted); font-size: 14px; transition: transform 0.3s; }
+.rank-key-toggle.open { transform: rotate(180deg); }
+.rank-key-body {
+  display: none; padding: 12px 20px;
+}
+.rank-key-body.show { display: block; }
+.rank-key-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--cream-border);
+}
+.rank-key-row:last-child { border-bottom: none; }
+.rank-key-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+.rank-key-info { flex: 1; }
+.rank-key-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.rank-key-desc { font-size: 11px; color: var(--brown-muted); }
+.rank-key-rarity {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  border: 1px solid var(--cream-border); color: var(--brown-muted); white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════ */
+.empty-state {
+  text-align: center; padding: 48px 24px;
+  color: var(--brown-muted);
+}
+.empty-icon { font-size: 48px; margin-bottom: 14px; opacity: 0.5; display: block; }
+.empty-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; color: var(--brown-faint); margin-bottom: 8px;
+}
+.empty-desc { font-size: 14px; line-height: 1.6; }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: calc(var(--safe-bottom) + 24px); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--cream-2); border: 1px solid var(--cream-border2);
+  color: var(--cream-card); padding: 12px 20px; border-radius: var(--r-md);
+  font-size: 14px; font-weight: 500; z-index: 999;
+  opacity: 0; transition: all 0.3s; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ══════════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════════ */
+.confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 500; }
+.cp {
+  position: absolute;
+  animation: cpFall linear forwards;
+  border-radius: 2px;
+}
+@keyframes cpFall {
+  0%   { opacity: 1; transform: translateY(-10px) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.5); }
+}
+
+/* ══════════════════════════════════════════
+   BOTTOM NAV BAR
+══════════════════════════════════════════ */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 440px;
+  background: rgba(249,197,46,0.95); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--cream-border);
+  display: flex; justify-content: space-around;
+  padding: 10px 0 calc(var(--safe-bottom) + 8px);
+  z-index: 100;
+}
+.bottom-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  text-decoration: none; cursor: pointer; padding: 4px 16px;
+  border-radius: var(--r-sm); transition: all 0.2s;
+}
+.bottom-btn-icon { font-size: 22px; }
+.bottom-btn-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--brown-muted);
+  transition: color 0.2s;
+}
+.bottom-btn.active .bottom-btn-label { color: var(--fly); }
+.bottom-btn.active .bottom-btn-icon  { filter: drop-shadow(0 0 6px rgba(244,179,0,0.6)); }
+
+/* ══════════════════════════════════════════
+   SCROLL PADDING FOR BOTTOM NAV
+══════════════════════════════════════════ */
+.page-content { padding-bottom: calc(80px + var(--safe-bottom)); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE FINE-TUNING
+══════════════════════════════════════════ */
+@media (max-width: 380px) {
+  .hero-title { font-size: 36px; }
+  .rank-grid  { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .rank-card .r-icon { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══════════════════════ HEADER ══════════════════════ -->
+<header class="site-header">
+  <a href="index.html" class="logo">
+    <div class="logo-badge">🂡</div>
+    Poker<span>Split</span>
+  </a>
+  <nav class="header-nav">
+    <a href="index.html"         class="nav-link">Game</a>
+    <a href="poker-hands.html"   class="nav-link">Hands</a>
+    <a href="hand-history.html"  class="nav-link active">History</a>
+  </nav>
+</header>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<div class="hero">
+  <div class="hero-suit">♠</div>
+  <div class="hero-pill">Hand Tracker</div>
+  <h1 class="hero-title">Every hand.<br><em>Every legend.</em></h1>
+  <p class="hero-sub">Record winning hands, track rivalries, and discover who truly dominates your league.</p>
+</div>
+
+<!-- ══════════════════════ VIEW TABS ══════════════════════ -->
+<div class="view-tabs" id="view-tabs">
+  <div class="view-tab active" data-view="record" onclick="switchView('record')">Record</div>
+  <div class="view-tab" data-view="history" onclick="switchView('history')">History</div>
+  <div class="view-tab" data-view="stats" onclick="switchView('stats')">Stats</div>
+  <div class="view-tab" data-view="players" onclick="switchView('players')">Players</div>
+</div>
+
+<div class="page-content">
+
+<!-- ══════════════════════════════════════════════════
+     VIEW: RECORD
+══════════════════════════════════════════════════ -->
+<div id="view-record">
+
+  <!-- Session selector -->
+  <div class="session-selector">
+    <div class="session-select-label">
+      <span>Session</span>
+      <span id="session-count-label" style="color:var(--fly);"></span>
+    </div>
+    <div class="session-pills" id="session-pills"></div>
+  </div>
+
+  <!-- Recording panel -->
+  <div class="record-panel">
+    <div class="record-panel-header">
+      <div class="record-panel-title">Record Winning Hand</div>
+      <span style="font-size:20px;">🃏</span>
+    </div>
+    <div class="record-panel-body">
+
+      <!-- Hand rank grid -->
+      <div style="margin-bottom:12px;">
+        <div class="label" style="margin-bottom:10px;">Select Hand Rank</div>
+        <div class="rank-grid" id="rank-grid"></div>
+        <div id="selected-rank-display" style="display:none; text-align:center; padding:10px 0 4px; font-size:13px; color:var(--fly); font-weight:600;"></div>
+      </div>
+
+      <!-- Fields -->
+      <div class="record-fields">
+        <div class="record-field">
+          <label>Winner</label>
+          <select class="record-input" id="f-winner">
+            <option value="">Select player…</option>
+          </select>
+        </div>
+        <div class="record-field">
+          <label>Pot Size ($)</label>
+          <input class="record-input" id="f-pot" type="number" placeholder="Optional" min="0">
+        </div>
+        <div class="record-field">
+          <label>Specific Cards</label>
+          <input class="record-input" id="f-cards" placeholder="e.g. A♠ K♠ Q♠ J♠ T♠">
+        </div>
+        <div class="record-field">
+          <label>Hand # (optional)</label>
+          <input class="record-input" id="f-handnum" type="number" placeholder="e.g. 14" min="1">
+        </div>
+      </div>
+
+      <!-- Notable toggle -->
+      <div class="notable-toggle" onclick="toggleNotable()">
+        <div class="toggle-box" id="notable-toggle"></div>
+        <div class="notable-toggle-label">Flag as notable / memorable hand ⭐</div>
+      </div>
+
+      <!-- Note row (conditionally shown) -->
+      <div class="record-note-row" id="note-row">
+        <div class="record-field full" style="margin-bottom:0;">
+          <label>Story / Note</label>
+          <input class="record-input" id="f-note" placeholder="e.g. Carlos bluffed all-in with 2-7 and got called!">
+        </div>
+      </div>
+
+      <button class="btn-record" id="btn-record" onclick="recordHand()">
+        <span>Record Hand</span> <span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick tip -->
+  <div style="margin:0 20px 20px; padding:14px 16px; background:var(--cream-card); border:1px solid var(--cream-border); border-radius:var(--r-md); display:flex; gap:10px;">
+    <span style="font-size:18px; flex-shrink:0;">💡</span>
+    <div style="font-size:12px; color:var(--brown-muted); line-height:1.6;">
+      Record every winning hand to unlock league statistics, player leaderboards, and the legendary Royal Flush tracker.
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW: HISTORY
+══════════════════════════════════════════════════ -->
+<div id="view-history" style="display:none;">
+
+  <!-- Session filter -->
+  <div class="session-selector">
+    <div class="session-select-label">Filter by Session</div>
+    <div class="session-pills" id="history-session-pills"></div>
+  </div>
+
+  <!-- Filter chips -->
+  <div class="history-section" style="margin-bottom:0;">
+    <div class="filter-row" id="filter-row">
+      <div class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">All Hands</div>
+      <div class="filter-chip notable-filter" data-filter="notable" onclick="setFilter('notable', this)">⭐ Notable</div>
+      <div class="filter-chip rare-filter" data-filter="rare" onclick="setFilter('rare', this)">💎 Rare</div>
+      <div class="filter-chip" data-filter="royal_flush" onclick="setFilter('royal_flush', this)">👑 Royal</div>
+      <div class="filter-chip" data-filter="straight_flush" onclick="setFilter('straight_flush', this)">🌟 Str. Flush</div>
+      <div class="filter-chip" data-filter="four_of_a_kind" onclick="setFilter('four_of_a_kind', this)">🔮 Quads</div>
+      <div class="filter-chip" data-filter="full_house" onclick="setFilter('full_house', this)">🏠 Full House</div>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="section-head">
+      <div class="section-title">Hand History</div>
+      <div class="section-meta" id="history-count"></div>
+    </div>
+    <div class="hand-list" id="hand-list"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW: STATS
+══════════════════════════════════════════════════ -->
+<div id="view-stats" style="display:none;">
+
+  <!-- Summary ribbon -->
+  <div class="stats-ribbon" id="stats-ribbon"></div>
+
+  <!-- Royal flush tracker -->
+  <div class="royal-tracker" id="royal-tracker"></div>
+
+  <!-- Frequency chart -->
+  <div class="frequency-section">
+    <div class="section-head">
+      <div class="section-title">Hand Frequency</div>
+      <div class="section-meta" id="freq-meta"></div>
+    </div>
+    <div class="freq-bar-list" id="freq-bars"></div>
+  </div>
+
+  <!-- Hand rank key / reference -->
+  <div class="rank-key">
+    <div class="rank-key-header" onclick="toggleRankKey()">
+      <div class="rank-key-title">Hand Rankings Reference</div>
+      <div class="rank-key-toggle" id="rank-key-toggle">▼</div>
+    </div>
+    <div class="rank-key-body" id="rank-key-body"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW: PLAYERS
+══════════════════════════════════════════════════ -->
+<div id="view-players" style="display:none;">
+
+  <div class="leaderboard-section">
+    <div class="section-head">
+      <div class="section-title">Wins Leaderboard</div>
+      <div class="section-meta" id="player-meta"></div>
+    </div>
+    <div id="player-leaderboard"></div>
+  </div>
+
+  <!-- Per-player breakdown -->
+  <div class="leaderboard-section">
+    <div class="section-head">
+      <div class="section-title">Breakdown by Player</div>
+    </div>
+    <div id="player-breakdown"></div>
+  </div>
+
+</div>
+
+</div><!-- end page-content -->
+</div><!-- end #app -->
+
+<!-- ══════════════════════ BOTTOM NAV ══════════════════════ -->
+<div class="bottom-bar">
+  <a href="/" class="bottom-btn">
+    <span class="bottom-btn-icon">🎮</span>
+    <span class="bottom-btn-label">Game</span>
+  </a>
+  <div class="bottom-btn active" onclick="switchView('record')">
+    <span class="bottom-btn-icon">🃏</span>
+    <span class="bottom-btn-label">Record</span>
+  </div>
+  <div class="bottom-btn" id="bnav-history" onclick="switchView('history')">
+    <span class="bottom-btn-icon">📜</span>
+    <span class="bottom-btn-label">History</span>
+  </div>
+  <div class="bottom-btn" id="bnav-stats" onclick="switchView('stats')">
+    <span class="bottom-btn-icon">📊</span>
+    <span class="bottom-btn-label">Stats</span>
+  </div>
+  <a href="/poker-hands.html" class="bottom-btn">
+    <span class="bottom-btn-icon">📖</span>
+    <span class="bottom-btn-label">Hands</span>
+  </a>
+</div>
+
+<div id="toast"></div>
+<div class="confetti-container" id="confetti-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════ -->
+<script>
+// ────────────────────────────────────────────────
+// CONSTANTS
+// ────────────────────────────────────────────────
+const HAND_RANKS = [
+  { key:'royal_flush',     icon:'👑', name:'Royal Flush',      abbr:'RF',  color:'#FFD700', rarity:'Ultra Rare',  desc:'A K Q J 10 of same suit', rare:true  },
+  { key:'straight_flush',  icon:'🌟', name:'Straight Flush',   abbr:'SF',  color:'#FF6B9D', rarity:'Very Rare',   desc:'Five consecutive same suit', rare:true  },
+  { key:'four_of_a_kind',  icon:'🔮', name:'Four of a Kind',   abbr:'4K',  color:'#9B72CF', rarity:'Rare',        desc:'All four cards of same rank', rare:true  },
+  { key:'full_house',      icon:'🏠', name:'Full House',       abbr:'FH',  color:'#4ECDC4', rarity:'Uncommon',    desc:'Three of a kind + pair', rare:false },
+  { key:'flush',           icon:'♠',  name:'Flush',            abbr:'FL',  color:'#45B7D1', rarity:'Uncommon',    desc:'Five cards same suit', rare:false },
+  { key:'straight',        icon:'→',  name:'Straight',         abbr:'ST',  color:'#96CEB4', rarity:'Uncommon',    desc:'Five consecutive ranks', rare:false },
+  { key:'three_of_a_kind', icon:'△',  name:'Three of a Kind',  abbr:'3K',  color:'#FFEAA7', rarity:'Common',      desc:'Three cards of same rank', rare:false },
+  { key:'two_pair',        icon:'⊞',  name:'Two Pair',         abbr:'2P',  color:'#DDA0DD', rarity:'Common',      desc:'Two different pairs', rare:false },
+  { key:'one_pair',        icon:'○',  name:'One Pair',         abbr:'1P',  color:'#98D8C8', rarity:'Very Common', desc:'Two cards of same rank', rare:false },
+  { key:'high_card',       icon:'↑',  name:'High Card',        abbr:'HC',  color:'#B0B8B4', rarity:'Most Common', desc:'Highest single card wins', rare:false },
+];
+
+const PLAYER_COLORS = ['#8B1A1A','#1A2E5A','#3D1A5A','#7A3D1A','#1A3D5A','#3D4A1A','#5A1A2E','#1A4A2E','#4A1A1A','#1A1A4A'];
+
+// ────────────────────────────────────────────────
+// STATE — persisted to localStorage
+// ────────────────────────────────────────────────
+const STORAGE_KEY = 'pokersplit_state_v1';
+const LEGACY_HANDS_KEY = 'pokersplit_hands_v2';
+
+function loadState() {
+  try {
+    // Preferred: unified app state
+    const rawUnified = localStorage.getItem(STORAGE_KEY);
+    if (rawUnified) {
+      const u = JSON.parse(rawUnified);
+      const league = u.league || null;
+      const sessions = Array.isArray(u.sessions) ? u.sessions : [];
+      const players = [];
+      if (league && Array.isArray(league.members)) {
+        league.members.forEach(m => { if(!players.includes(m.name)) players.push(m.name); });
+      }
+      const hands = [];
+      sessions.forEach(s => {
+        (s.hands||[]).forEach(h => {
+          hands.push({
+            id: h.id || ('h_'+Math.random().toString(36).slice(2)),
+            sessionId: s.id,
+            rank: h.rank,
+            note: h.note || '',
+            winner: h.winnerName || '',
+            winners: h.winners || [],
+            pot: h.pot,
+            createdAt: h.createdAt || s.endedAt || s.startedAt || Date.now()
+          });
+        });
+      });
+      return {
+        sessions: sessions.map(s => ({ id:s.id, name:s.name || 'Session', date: (s.startedAt? new Date(s.startedAt).toISOString().slice(0,10):'') })),
+        players: players.length ? players : (u.families||[]).flatMap(f=>f.members||[]).map(m=>m.name),
+        hands: hands
+      };
+    }
+
+    // Legacy hands-only storage (older page)
+    const rawLegacy = localStorage.getItem(LEGACY_HANDS_KEY);
+    if (rawLegacy) return JSON.parse(rawLegacy);
+  } catch(e) {}
+  return getDefaultState();
+}
+
+function getDefaultState() {
+  return {
+    sessions: [
+      { id:'s1', name:'Session 1', date:'2024-11-01' },
+      { id:'s2', name:'Session 2', date:'2024-11-15' },
+      { id:'s3', name:'Session 3', date:'2024-12-06' },
+    ],
+    players: ['Marco','Sofia','Leo','Carlos','Isabella','Diego','James','Emma','Tyler','Raj','Priya'],
+    hands: [
+      { id:'h1', sessionId:'s1', rank:'full_house',      winner:'Leo',      cards:'K♠ K♥ K♦ T♣ T♠', pot:45,  notable:true,  note:"Leo's legendary first big hand!",    handNum:7,  ts: Date.now()-950000 },
+      { id:'h2', sessionId:'s1', rank:'flush',           winner:'James',    cards:'A♠ K♠ 9♠ 6♠ 2♠', pot:32,  notable:false, note:'',                                    handNum:14, ts: Date.now()-940000 },
+      { id:'h3', sessionId:'s1', rank:'straight',        winner:'Marco',    cards:'J♥ T♦ 9♣ 8♠ 7♥', pot:28,  notable:false, note:'',                                    handNum:19, ts: Date.now()-930000 },
+      { id:'h4', sessionId:'s2', rank:'straight_flush',  winner:'Leo',      cards:'J♠ T♠ 9♠ 8♠ 7♠', pot:120, notable:true,  note:'Straight Flush on the river! Table went silent 🔥', handNum:3, ts: Date.now()-500000 },
+      { id:'h5', sessionId:'s2', rank:'four_of_a_kind',  winner:'James',    cards:'J♠ J♥ J♦ J♣ A♠', pot:95,  notable:true,  note:'James hit quads! Carlos still upset about this one 😂', handNum:11, ts: Date.now()-490000 },
+      { id:'h6', sessionId:'s2', rank:'full_house',      winner:'Priya',    cards:'T♥ T♦ T♣ 4♠ 4♥', pot:60,  notable:false, note:'',                                    handNum:17, ts: Date.now()-480000 },
+      { id:'h7', sessionId:'s2', rank:'two_pair',        winner:'Emma',     cards:'',                pot:22,  notable:false, note:'',                                    handNum:22, ts: Date.now()-470000 },
+      { id:'h8', sessionId:'s3', rank:'full_house',      winner:'Marco',    cards:'A♠ A♥ A♦ K♣ K♠', pot:88,  notable:true,  note:'Aces full of Kings — Marco finally wins a big one!', handNum:5, ts: Date.now()-86400 },
+      { id:'h9', sessionId:'s3', rank:'flush',           winner:'Sofia',    cards:'K♥ Q♥ 9♥ 6♥ 3♥', pot:44,  notable:false, note:'',                                    handNum:9,  ts: Date.now()-80000 },
+      { id:'h10',sessionId:'s3', rank:'straight',        winner:'Carlos',   cards:'9♣ 8♦ 7♥ 6♠ 5♣', pot:35,  notable:false, note:'',                                    handNum:15, ts: Date.now()-70000 },
+      { id:'h11',sessionId:'s3', rank:'three_of_a_kind', winner:'Diego',    cards:'',                pot:18,  notable:false, note:'',                                    handNum:20, ts: Date.now()-60000 },
+      { id:'h12',sessionId:'s3', rank:'one_pair',        winner:'Isabella', cards:'',                pot:12,  notable:false, note:'',                                    handNum:24, ts: Date.now()-50000 },
+    ],
+    activeSessionId: 's3',
+    historySessionId: 'all',
+    currentView: 'record',
+    historyFilter: 'all',
+    nextHandId: 13,
+    nextSessionId: 4,
+  };
+}
+
+let S = loadState();
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch(e) {}
+}
+
+// ────────────────────────────────────────────────
+// HELPERS
+// ────────────────────────────────────────────────
+function genId(prefix) { return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+function getRank(key) { return HAND_RANKS.find(r => r.key === key); }
+
+function playerColor(name) {
+  const idx = S.players.indexOf(name);
+  return PLAYER_COLORS[idx % PLAYER_COLORS.length] || '#888';
+}
+
+function initials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function hexRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60)   return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400)return `${Math.floor(diff/3600)}h ago`;
+  const d = Math.floor(diff/86400);
+  return d === 1 ? 'yesterday' : `${d}d ago`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function getFilteredHands() {
+  let hands = [...S.hands];
+
+  // Session filter
+  const sid = S.historySessionId;
+  if (sid && sid !== 'all') {
+    hands = hands.filter(h => h.sessionId === sid);
+  }
+
+  // Content filter
+  const f = S.historyFilter;
+  if (f === 'notable') hands = hands.filter(h => h.notable);
+  else if (f === 'rare') hands = hands.filter(h => getRank(h.rank)?.rare);
+  else if (f !== 'all') hands = hands.filter(h => h.rank === f);
+
+  return hands.reverse();
+}
+
+function getHandCounts() {
+  const counts = {};
+  HAND_RANKS.forEach(r => counts[r.key] = 0);
+  S.hands.forEach(h => { if (counts.hasOwnProperty(h.rank)) counts[h.rank]++; });
+  return counts;
+}
+
+function getPlayerStats() {
+  const stats = {};
+  S.players.forEach(p => {
+    stats[p] = { name: p, total: 0, byRank: {}, bestRankKey: null };
+    HAND_RANKS.forEach(r => stats[p].byRank[r.key] = 0);
+  });
+  S.hands.forEach(h => {
+    if (!stats[h.winner]) stats[h.winner] = { name:h.winner, total:0, byRank:{}, bestRankKey:null };
+    stats[h.winner].total++;
+    if (!stats[h.winner].byRank[h.rank]) stats[h.winner].byRank[h.rank] = 0;
+    stats[h.winner].byRank[h.rank]++;
+  });
+  // Determine best hand per player
+  Object.values(stats).forEach(ps => {
+    for (const r of HAND_RANKS) {
+      if (ps.byRank[r.key] > 0) { ps.bestRankKey = r.key; break; }
+    }
+  });
+  return Object.values(stats).filter(p => p.total > 0).sort((a,b) => b.total - a.total);
+}
+
+// ────────────────────────────────────────────────
+// RENDER: SESSION PILLS
+// ────────────────────────────────────────────────
+function renderSessionPills(containerId, activeId, onChange) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  let html = `<div class="session-pill all ${activeId==='all'?'active':''}" onclick="${onChange}('all')">All</div>`;
+  S.sessions.forEach(s => {
+    html += `<div class="session-pill ${s.id===activeId?'active':''}" onclick="${onChange}('${s.id}')">${s.name}</div>`;
+  });
+  html += `<div class="session-pill" onclick="addNewSession()" style="border-style:dashed; color:var(--fly);">+ New</div>`;
+  el.innerHTML = html;
+
+  document.getElementById('session-count-label').textContent = `${S.hands.length} recorded`;
+}
+
+function setActiveSession(id) {
+  S.activeSessionId = id === 'all' ? S.sessions[S.sessions.length-1]?.id || '' : id;
+  renderSessionPills('session-pills', S.activeSessionId, 'setActiveSession');
+  saveState();
+}
+
+function setHistorySession(id) {
+  S.historySessionId = id;
+  renderSessionPills('history-session-pills', id, 'setHistorySession');
+  renderHistoryView();
+  saveState();
+}
+
+function addNewSession() {
+  const name = prompt('Session name (e.g. "Session 4" or "New Year\'s Eve"):');
+  if (!name || !name.trim()) return;
+  const newSession = {
+    id: genId('s'),
+    name: name.trim(),
+    date: new Date().toISOString().split('T')[0]
+  };
+  S.sessions.push(newSession);
+  S.activeSessionId = newSession.id;
+  saveState();
+  renderSessionPills('session-pills', S.activeSessionId, 'setActiveSession');
+  renderSessionPills('history-session-pills', S.historySessionId, 'setHistorySession');
+  showToast(`${newSession.name} created 🎉`);
+}
+
+// ────────────────────────────────────────────────
+// RENDER: RANK GRID
+// ────────────────────────────────────────────────
+let selectedRank = null;
+
+function renderRankGrid() {
+  const grid = document.getElementById('rank-grid');
+  grid.innerHTML = HAND_RANKS.map(r => `
+    <div class="rank-card ${selectedRank===r.key?'selected':''}"
+         style="--rank-color:${r.color}"
+         data-rank="${r.key}"
+         onclick="selectRank('${r.key}')">
+      <span class="r-icon">${r.icon}</span>
+      <span class="r-abbr">${r.abbr}</span>
+    </div>
+  `).join('');
+}
+
+function selectRank(key) {
+  selectedRank = key;
+  renderRankGrid();
+  const r = getRank(key);
+  const disp = document.getElementById('selected-rank-display');
+  disp.style.display = 'block';
+  disp.innerHTML = `<span style="color:${r.color}">${r.icon} ${r.name}</span> <span style="color:var(--brown-muted); font-size:11px;">${r.rarity}</span>`;
+  if (r.rare) triggerConfetti(r.color);
+}
+
+// ────────────────────────────────────────────────
+// RENDER: WINNER SELECT
+// ────────────────────────────────────────────────
+function renderWinnerSelect() {
+  const sel = document.getElementById('f-winner');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Select player…</option>' +
+    S.players.map(p => `<option value="${p}" ${p===current?'selected':''}>${p}</option>`).join('') +
+    '<option value="__add__">+ Add new player…</option>';
+
+  sel.onchange = function() {
+    if (this.value === '__add__') {
+      const name = prompt('New player name:');
+      if (name && name.trim()) {
+        const n = name.trim();
+        if (!S.players.includes(n)) { S.players.push(n); saveState(); }
+        renderWinnerSelect();
+        document.getElementById('f-winner').value = n;
+      } else {
+        this.value = '';
+      }
+    }
+  };
+}
+
+// ────────────────────────────────────────────────
+// NOTABLE TOGGLE
+// ────────────────────────────────────────────────
+let isNotable = false;
+function toggleNotable() {
+  isNotable = !isNotable;
+  document.getElementById('notable-toggle').classList.toggle('on', isNotable);
+  document.getElementById('note-row').classList.toggle('show', isNotable);
+}
+
+// ────────────────────────────────────────────────
+// RECORD HAND
+// ────────────────────────────────────────────────
+function recordHand() {
+  if (!selectedRank) { showToast('Select a winning hand rank 👆'); return; }
+  const winner = document.getElementById('f-winner').value;
+  if (!winner) { showToast('Select the winner 👆'); return; }
+
+  const pot     = parseFloat(document.getElementById('f-pot').value)     || 0;
+  const cards   = document.getElementById('f-cards').value.trim();
+  const handNum = parseInt(document.getElementById('f-handnum').value)   || null;
+  const note    = isNotable ? document.getElementById('f-note').value.trim() : '';
+  const rank    = getRank(selectedRank);
+
+  const hand = {
+    id:        genId('h'),
+    sessionId: S.activeSessionId || (S.sessions[S.sessions.length-1]?.id || 's1'),
+    rank:      selectedRank,
+    winner,
+    cards,
+    pot,
+    handNum,
+    notable:   isNotable,
+    note,
+    ts:        Date.now()
+  };
+
+  S.hands.push(hand);
+  saveState();
+
+  // Reset form
+  selectedRank = null;
+  isNotable = false;
+  renderRankGrid();
+  document.getElementById('selected-rank-display').style.display = 'none';
+  document.getElementById('f-winner').value = '';
+  document.getElementById('f-pot').value = '';
+  document.getElementById('f-cards').value = '';
+  document.getElementById('f-handnum').value = '';
+  document.getElementById('f-note').value = '';
+  document.getElementById('notable-toggle').classList.remove('on');
+  document.getElementById('note-row').classList.remove('show');
+  document.getElementById('session-count-label').textContent = `${S.hands.length} recorded`;
+
+  const msg = rank.key === 'royal_flush'    ? '👑 ROYAL FLUSH RECORDED! LEGENDARY!' :
+              rank.key === 'straight_flush'  ? '🌟 Straight Flush! Incredible hand!' :
+              rank.key === 'four_of_a_kind'  ? '🔮 Quads! Someone call a doctor!' :
+              `${rank.icon} ${rank.name} recorded for ${winner}`;
+  showToast(msg, rank.rare ? 4000 : 2500);
+
+  if (rank.rare) { triggerConfetti(rank.color); triggerConfetti(rank.color); }
+}
+
+// ────────────────────────────────────────────────
+// RENDER: HISTORY VIEW
+// ────────────────────────────────────────────────
+function renderHistoryView() {
+  const hands = getFilteredHands();
+  const el = document.getElementById('hand-list');
+  const countEl = document.getElementById('history-count');
+  countEl.textContent = `${hands.length} hand${hands.length !== 1 ? 's' : ''}`;
+
+  if (!hands.length) {
+    el.innerHTML = `<div class="empty-state"><span class="empty-icon">🃏</span><div class="empty-title">No hands yet</div><div class="empty-desc">Record your first winning hand using the Record tab.</div></div>`;
+    return;
+  }
+
+  el.innerHTML = hands.map((h, i) => {
+    const rank = getRank(h.rank);
+    if (!rank) return '';
+    const session = S.sessions.find(s => s.id === h.sessionId);
+    const isRare = rank.rare;
+    const parsedCards = h.cards ? parseCards(h.cards) : [];
+    const pColor = playerColor(h.winner);
+
+    return `
+      <div class="hand-card ${h.notable ? 'notable-card' : ''} ${isRare ? 'rare-card' : ''}"
+           style="animation-delay:${i*0.04}s">
+        <div class="hand-card-top">
+          <div class="hand-rank-badge" style="background:${hexRgba(rank.color, 0.12)}; border:1px solid ${hexRgba(rank.color,0.2)};">
+            ${rank.icon}
+          </div>
+          <div class="hand-card-meta">
+            <div class="hand-winner-name">
+              <div style="width:26px; height:26px; border-radius:50%; background:${hexRgba(pColor,0.2)}; color:${pColor}; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; border:1.5px solid ${pColor}; flex-shrink:0;">${initials(h.winner)}</div>
+              ${h.winner}
+              ${h.notable ? '<span style="font-size:14px;">⭐</span>' : ''}
+              ${isRare ? `<span style="font-size:11px; padding:2px 8px; border-radius:10px; background:${hexRgba(rank.color,0.15)}; color:${rank.color}; border:1px solid ${hexRgba(rank.color,0.3)}; font-weight:600;">${rank.rarity}</span>` : ''}
+            </div>
+            <div class="hand-rank-label" style="color:${rank.color}">${rank.name}</div>
+            <div class="hand-details-row">
+              ${session ? `<span class="detail-chip">${session.name}</span>` : ''}
+              ${h.handNum ? `<span class="detail-chip">Hand #${h.handNum}</span>` : ''}
+              ${h.pot ? `<span class="detail-chip pot">$${h.pot}</span>` : ''}
+              <span class="detail-chip">${timeAgo(h.ts)}</span>
+            </div>
+          </div>
+        </div>
+
+        ${parsedCards.length ? `
+          <div class="hand-cards-row">
+            ${parsedCards.map(c => `<div class="playing-card ${c.suit}">${c.display}</div>`).join('')}
+          </div>
+        ` : ''}
+
+        ${h.notable && h.note ? `
+          <div class="hand-note-row">
+            <span class="hand-note-icon">💬</span>
+            <div class="hand-note-text">${escHtml(h.note)}</div>
+          </div>
+        ` : ''}
+
+        <div class="hand-card-actions">
+          <div class="action-btn" onclick="editHandNote('${h.id}')">✏️ Note</div>
+          <div class="action-btn delete" onclick="deleteHand('${h.id}')">Delete</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function parseCards(str) {
+  // Parse cards like "A♠ K♥ Q♦ J♣ T♠"
+  const tokens = str.trim().split(/\s+/);
+  return tokens.slice(0,7).map(t => {
+    const suits = { '♠':'spades','♥':'hearts','♦':'diamonds','♣':'clubs' };
+    const suitChar = t.slice(-1);
+    const rank = t.slice(0,-1);
+    const suit = suits[suitChar] || 'spades';
+    return { display: t, suit, rank };
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function deleteHand(id) {
+  if (!confirm('Delete this hand from history?')) return;
+  S.hands = S.hands.filter(h => h.id !== id);
+  saveState();
+  renderHistoryView();
+  document.getElementById('session-count-label').textContent = `${S.hands.length} recorded`;
+  showToast('Hand removed');
+}
+
+function editHandNote(id) {
+  const hand = S.hands.find(h => h.id === id);
+  if (!hand) return;
+  const note = prompt('Edit note for this hand:', hand.note || '');
+  if (note === null) return;
+  hand.note = note.trim();
+  hand.notable = hand.note.length > 0;
+  saveState();
+  renderHistoryView();
+  showToast('Note updated ✓');
+}
+
+// ────────────────────────────────────────────────
+// FILTER
+// ────────────────────────────────────────────────
+function setFilter(filter, el) {
+  S.historyFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderHistoryView();
+  saveState();
+}
+
+// ────────────────────────────────────────────────
+// RENDER: STATS VIEW
+// ────────────────────────────────────────────────
+function renderStatsView() {
+  const counts = getHandCounts();
+  const total = Object.values(counts).reduce((a,b) => a+b, 0);
+  const notableCount = S.hands.filter(h => h.notable).length;
+  const rareCount = S.hands.filter(h => getRank(h.rank)?.rare).length;
+
+  // Ribbon
+  document.getElementById('stats-ribbon').innerHTML = `
+    <div class="stat-box">
+      <span class="stat-box-value gold">${total}</span>
+      <span class="stat-box-label">Total Hands</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-box-value">${notableCount}</span>
+      <span class="stat-box-label">Notable ⭐</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-box-value" style="color:var(--rare);">${rareCount}</span>
+      <span class="stat-box-label">Rare Hands 💎</span>
+    </div>
+  `;
+
+  // Royal flush tracker
+  const royalCount = counts['royal_flush'];
+  const sessionsSinceRoyal = royalCount > 0 ? 0 : S.sessions.length;
+  document.getElementById('royal-tracker').innerHTML = `
+    <div class="royal-count">${royalCount}</div>
+    <div class="royal-label">Royal Flush${royalCount !== 1 ? 'es' : ''} Recorded</div>
+    ${royalCount > 0
+      ? `<div class="royal-sub">The rarest hand in poker. Your league has witnessed ${royalCount === 1 ? 'one' : royalCount} piece of history.</div>`
+      : `<div class="royal-sub">The ultimate poker hand. One in 649,739 odds.</div>
+         <div class="royal-never">
+           <span>${S.sessions.length} session${S.sessions.length !== 1 ? 's' : ''} played — still waiting…</span>
+         </div>`
+    }
+  `;
+
+  // Frequency bars
+  document.getElementById('freq-meta').textContent = `${total} total recorded`;
+  const sorted = HAND_RANKS.filter(r => counts[r.key] > 0).sort((a,b) => counts[b.key] - counts[a.key]);
+  const maxCount = sorted.length ? counts[sorted[0].key] : 1;
+  document.getElementById('freq-bars').innerHTML = sorted.length
+    ? sorted.map(r => {
+        const pct = Math.max((counts[r.key] / maxCount) * 100, 4);
+        return `
+          <div class="freq-bar-item">
+            <div class="freq-icon">${r.icon}</div>
+            <div class="freq-bar-wrap">
+              <div class="freq-bar-track">
+                <div class="freq-bar-fill" style="width:${pct}%; background:linear-gradient(90deg,${r.color},${r.color}99)">
+                  <span class="freq-bar-name">${r.name}</span>
+                </div>
+              </div>
+            </div>
+            <div class="freq-count">${counts[r.key]}</div>
+          </div>
+        `;
+      }).join('')
+    : `<div class="empty-state" style="padding:30px 0;"><span class="empty-icon">📊</span><div class="empty-title">No data yet</div><div class="empty-desc">Record some hands to see frequency stats.</div></div>`;
+
+  // Rank key
+  document.getElementById('rank-key-body').innerHTML = HAND_RANKS.map(r => `
+    <div class="rank-key-row">
+      <div class="rank-key-icon">${r.icon}</div>
+      <div class="rank-key-info">
+        <div class="rank-key-name" style="color:${r.color}">${r.name}</div>
+        <div class="rank-key-desc">${r.desc}</div>
+      </div>
+      <div class="rank-key-rarity">${r.rarity}</div>
+    </div>
+  `).join('');
+}
+
+function toggleRankKey() {
+  const body = document.getElementById('rank-key-body');
+  const toggle = document.getElementById('rank-key-toggle');
+  body.classList.toggle('show');
+  toggle.classList.toggle('open');
+}
+
+// ────────────────────────────────────────────────
+// RENDER: PLAYERS VIEW
+// ────────────────────────────────────────────────
+function renderPlayersView() {
+  const playerStats = getPlayerStats();
+  document.getElementById('player-meta').textContent = `${playerStats.length} players`;
+
+  // Leaderboard
+  document.getElementById('player-leaderboard').innerHTML = playerStats.length
+    ? playerStats.slice(0,8).map((ps, i) => {
+        const rankClass = i===0?'one':i===1?'two':i===2?'three':'';
+        const bestRank = ps.bestRankKey ? getRank(ps.bestRankKey) : null;
+        const pColor = playerColor(ps.name);
+        const winRate = S.hands.length > 0 ? Math.round(ps.total / S.hands.length * 100) : 0;
+        return `
+          <div class="player-hand-row">
+            <div class="rank-num ${rankClass}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+            <div class="player-avatar" style="background:${hexRgba(pColor,0.18)}; color:${pColor}; border:2px solid ${pColor};">${initials(ps.name)}</div>
+            <div class="player-hand-info">
+              <div class="player-hand-name">${ps.name}</div>
+              <div class="player-hand-sub">${ps.total} win${ps.total!==1?'s':''} · ${winRate}% of all hands</div>
+            </div>
+            <div class="player-hand-best">
+              ${bestRank ? `<span class="best-hand-icon">${bestRank.icon}</span>` : ''}
+              <div class="best-hand-label">${bestRank?.name || ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('')
+    : `<div class="empty-state"><span class="empty-icon">👤</span><div class="empty-title">No data yet</div></div>`;
+
+  // Per-player breakdown cards
+  document.getElementById('player-breakdown').innerHTML = playerStats.slice(0,6).map(ps => {
+    const pColor = playerColor(ps.name);
+    const ranksWithWins = HAND_RANKS.filter(r => ps.byRank[r.key] > 0);
+    return `
+      <div style="background:var(--cream-card); border:1px solid var(--cream-border); border-radius:var(--r-lg); padding:16px; margin-bottom:10px; border-left:3px solid ${pColor};">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+          <div style="width:44px; height:44px; border-radius:50%; background:${hexRgba(pColor,0.18)}; color:${pColor}; border:2px solid ${pColor}; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700;">${initials(ps.name)}</div>
+          <div style="flex:1;">
+            <div style="font-size:16px; font-weight:700;">${ps.name}</div>
+            <div style="font-size:12px; color:var(--brown-muted);">${ps.total} hands won</div>
+          </div>
+          <div style="font-family:'DM Mono'; font-size:22px; font-weight:500; color:var(--fly);">${ps.total}</div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          ${ranksWithWins.map(r => `
+            <div style="display:flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; background:${hexRgba(r.color,0.1)}; border:1px solid ${hexRgba(r.color,0.2)};">
+              <span style="font-size:14px;">${r.icon}</span>
+              <span style="font-size:12px; font-weight:600; color:${r.color};">${ps.byRank[r.key]}×</span>
+              <span style="font-size:11px; color:var(--brown-muted);">${r.abbr}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('') || `<div class="empty-state"><span class="empty-icon">📊</span><div class="empty-title">No data yet</div></div>`;
+}
+
+// ────────────────────────────────────────────────
+// VIEW SWITCHING
+// ────────────────────────────────────────────────
+const VIEWS = ['record','history','stats','players'];
+const VIEW_LABELS = { record:'Record', history:'History', stats:'Stats', players:'Players' };
+
+function switchView(view) {
+  S.currentView = view;
+  VIEWS.forEach(v => {
+    const el = document.getElementById('view-'+v);
+    if (el) el.style.display = v === view ? 'block' : 'none';
+  });
+  document.querySelectorAll('.view-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === view);
+  });
+
+  // Update bottom nav
+  document.querySelectorAll('.bottom-btn').forEach(b => b.classList.remove('active'));
+
+  if (view === 'record') renderRecordView();
+  else if (view === 'history') { renderHistoryView(); document.getElementById('bnav-history')?.classList.add('active'); }
+  else if (view === 'stats')   { renderStatsView();   document.getElementById('bnav-stats')?.classList.add('active'); }
+  else if (view === 'players') renderPlayersView();
+
+  saveState();
+}
+
+function renderRecordView() {
+  renderSessionPills('session-pills', S.activeSessionId, 'setActiveSession');
+  renderRankGrid();
+  renderWinnerSelect();
+}
+
+// ────────────────────────────────────────────────
+// TOAST
+// ────────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ────────────────────────────────────────────────
+// CONFETTI
+// ────────────────────────────────────────────────
+function triggerConfetti(baseColor='#f4b300') {
+  const container = document.getElementById('confetti-container');
+  const colors = [baseColor, '#FFD700', '#FFFFFF', '#f4b300', baseColor+'99'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'cp';
+    const size = 5 + Math.random() * 8;
+    p.style.cssText = `
+      left:${5 + Math.random()*90}%;
+      width:${size}px; height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*0.4}s;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    container.appendChild(p);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 3500);
+}
+
+// ────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Set up session history pill render for history view
+  renderSessionPills('history-session-pills', S.historySessionId, 'setHistorySession');
+
+  // Boot into saved view
+  switchView(S.currentView || 'record');
+});
+</script>
+</body>
+</html>
