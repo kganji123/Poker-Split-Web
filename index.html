@@ -665,7 +665,7 @@ select.field-input { cursor: pointer; }
     Poker<span>Split</span>
   </a>
   <nav class="header-nav">
-  <!-- <a href="/hand-history.html" class="nav-link">History</a> -->
+    <!-- <a href="/hand-history.html" class="nav-link">History</a> -->
     <a href="/poker-hands.html"  class="nav-link">Hands</a>
   </nav>
 </header>
@@ -694,11 +694,11 @@ select.field-input { cursor: pointer; }
     <div class="section-sub">Create a league or load a demo to explore.</div>
 
     <!-- Google Sign In (optional, for cloud sync) -->
-    <button class="btn btn-primary" onclick="signInWithGoogle()" style="margin-bottom:12px; background: var(--fly); color: var(--brown);">
+    <button id="welcome-google-btn" class="btn btn-primary" onclick="signInWithGoogle()" style="margin-bottom:12px; background: var(--fly); color: var(--brown);">
       🔐 Continue with Google
     </button>
     
-    <div style="text-align: center; margin: 12px 0; font-size: 12px; color: var(--brown-muted);">
+    <div id="welcome-divider" style="text-align: center; margin: 12px 0; font-size: 12px; color: var(--brown-muted);">
       or create locally
     </div>
 
@@ -1112,8 +1112,13 @@ function updateAuthUI() {
     }
   }
   
+  // Update welcome screen Google button visibility
+  const welcomeGoogleBtn = document.getElementById('welcome-google-btn');
+  const welcomeDivider = document.getElementById('welcome-divider');
+  
   if (currentUser) {
-    // Show user info
+    // User is signed in
+    // Update header button
     const displayName = currentUser.user_metadata?.full_name || 
                         currentUser.email?.split('@')[0] || 
                         'User';
@@ -1122,11 +1127,21 @@ function updateAuthUI() {
       if (confirm(`Sign out from ${displayName}?`)) signOut();
     };
     authBtn.title = currentUser.email;
+    
+    // Hide welcome screen Google button
+    if (welcomeGoogleBtn) welcomeGoogleBtn.style.display = 'none';
+    if (welcomeDivider) welcomeDivider.style.display = 'none';
+    
   } else {
-    // Show sign in
+    // User is NOT signed in
+    // Update header button
     authBtn.innerHTML = '🔐 Sign In';
     authBtn.onclick = signInWithGoogle;
     authBtn.title = 'Sign in with Google';
+    
+    // Show welcome screen Google button
+    if (welcomeGoogleBtn) welcomeGoogleBtn.style.display = 'block';
+    if (welcomeDivider) welcomeDivider.style.display = 'block';
   }
 }
 
